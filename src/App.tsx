@@ -5,7 +5,7 @@ import { MantineProvider, createTheme, AppShell, Burger, Group, Text, NavLink, A
 import { Notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { IconSun, IconMoon, IconLogout } from '@tabler/icons-react';
+import { IconSun, IconMoon, IconLogout, IconHeadset } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from './store/useStore';
 import { NAV_ITEMS } from './constants/navigation';
@@ -78,6 +78,12 @@ function WebAppHeader() {
     setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light');
   };
 
+  const handleSupportLink = () => {
+    if (config.SUPPORT_LINK) {
+      window.open(config.SUPPORT_LINK, '_blank');
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -85,6 +91,14 @@ function WebAppHeader() {
 
   return (
     <Group justify="flex-end" p="sm" gap="xs">
+     { config.SUPPORT_LINK &&  <ActionIcon
+        onClick={handleSupportLink}
+        variant="subtle"
+        size="lg"
+        color="blue"
+      >
+        <IconHeadset size={20} />
+      </ActionIcon> }
       <LanguageSwitcher />
       <ActionIcon
         onClick={handleThemeToggle}
@@ -182,6 +196,12 @@ function AppContent() {
   const { user, isAuthenticated, isLoading, setUser, setIsLoading, logout } = useStore();
   const [isTelegramWebApp] = useState(isInsideTelegramWebApp);
   const { t } = useTranslation();
+
+  const handleSupportLink = () => {
+    if (config.SUPPORT_LINK) {
+      window.open(config.SUPPORT_LINK, '_blank');
+    }
+  };
 
   // Инициализация Telegram WebApp
   useEffect(() => {
@@ -307,6 +327,14 @@ function AppContent() {
           </Group>
           <Group>
             <Text size="sm" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>{user?.login}</Text>
+          { config.SUPPORT_LINK &&  <ActionIcon
+              onClick={handleSupportLink}
+              variant="subtle"
+              size="lg"
+              color="blue"
+            >
+              <IconHeadset size={20} />
+            </ActionIcon> }
             <LanguageSwitcher />
             <ThemeToggle />
             <ActionIcon
@@ -339,6 +367,20 @@ function AppContent() {
               />
             );
           })}
+        </AppShell.Section>
+        <AppShell.Section>
+          <Center py="md">
+            <Text
+              component="a"
+              href="https://myshm.ru"
+              target="_blank"
+              size="sm"
+              c="dimmed"
+              style={{ textDecoration: 'none' }}
+            >
+              Powered by MySHM.ru
+            </Text>
+          </Center>
         </AppShell.Section>
       </AppShell.Navbar>
 

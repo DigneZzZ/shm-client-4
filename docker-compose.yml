@@ -10,4 +10,7 @@ services:
       - SHM_URL=http://api
       # Optional: custom base path (e.g., /client)
       # - SHM_BASE_PATH=/
+      # - TELEGRAM_BOT_NAME=your_bot
+      # - TELEGRAM_BOT_AUTH_ENABLE=true
+      # - SUPPORT_LINK=https://t.me/your_support_bot
     restart: unless-stopped

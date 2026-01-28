@@ -332,7 +332,7 @@ export default function Profile() {
               <IconWallet size={24} />
               <Text size="xl" fw={700}>{profile.balance?.toFixed(2) || '0.00'} {t('common.currency')}</Text>
             </Group>
-            {profile.credit && profile.credit > 0 && <Text size="xm" c="dimmed">{t('profile.credit')}: {profile.credit}</Text>}
+            { profile.credit && profile.credit > 0 ? ( <Text size="xm" c="dimmed">{t('profile.credit')}: {profile.credit}</Text>) : undefined}
           </div>
           <Button leftSection={<IconCreditCard size={18} />} onClick={() => setPayModalOpen(true)}>
             {t('profile.topUp')}
@@ -455,6 +455,9 @@ export default function Profile() {
             <Text size="sm" c="dimmed">{t('profile.telegramNotLinked')}</Text>
           )}
         </Group>
+          <Text size="xs" c="dimmed" mt="md">
+            {t('profile.telegramDescription')}
+          </Text>
       </Card>
 
       <PasskeySettings />

@@ -88,7 +88,8 @@
     "method": "method",
     "methods": "methods",
     "autopaymentEnabled": "Auto-payment enabled",
-    "user": "User"
+    "user": "User",
+    "telegramDescription": "Linking Telegram will allow you to receive notifications about the status of services and payments."
   },
   "services": {
     "title": "My Services",
