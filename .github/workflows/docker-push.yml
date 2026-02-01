@@ -8,7 +8,7 @@ on:
     inputs:
       tag:
         description: 'Version tag (e.g. 1.0.0)'
-        required: true
+        required: false
         default: 'latest'
 
 jobs:
