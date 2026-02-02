@@ -1,20 +1,21 @@
 import { useState } from 'react';
-import { Card, Text, Stack, Group, Button, Divider, Modal, PasswordInput } from '@mantine/core';
+import { Card, Text, Stack, Group, Button, Modal, PasswordInput } from '@mantine/core';
+// import { Card, Text, Stack, Group, Button, Divider, Modal, PasswordInput } from '@mantine/core';
 import { IconShieldLock, IconLock } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { userApi } from '../api/client';
-import PasskeySettings from './PasskeySettings';
-import OtpSettings from './OtpSettings';
-import PasswordAuthSettings from './PasswordAuthSettings';
-import { config } from '../config';
-import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
+// import PasskeySettings from './PasskeySettings';
+// import OtpSettings from './OtpSettings';
+// import PasswordAuthSettings from './PasswordAuthSettings';
+// import { config } from '../config';
+// import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 
 export default function SecuritySettings() {
   const { t } = useTranslation();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
-  const { isInsideTelegramWebApp } = useTelegramWebApp();
+  // const { isInsideTelegramWebApp } = useTelegramWebApp();
 
   const handleChangePassword = async () => {
     if (!newPassword) {
@@ -43,7 +44,7 @@ export default function SecuritySettings() {
     }
   };
 
-  const hasTelegramWidget = !isInsideTelegramWebApp && !!config.TELEGRAM_BOT_NAME && config.TELEGRAM_BOT_AUTH_ENABLE === 'true';
+  // const hasTelegramWidget = !isInsideTelegramWebApp && !!config.TELEGRAM_BOT_NAME && config.TELEGRAM_BOT_AUTH_ENABLE === 'true';
 
 
   return (
@@ -55,8 +56,7 @@ export default function SecuritySettings() {
         </Group>
 
         <Stack gap="lg">
-
-          {/* OTP / 2FA */}
+{/*
           <OtpSettings embedded />
 
           {hasTelegramWidget && (
@@ -69,7 +69,7 @@ export default function SecuritySettings() {
 
               <PasswordAuthSettings embedded />
             </>
-          )}
+          )} */}
 
           {/* Изменение пароля */}
           <Stack gap="xs">
