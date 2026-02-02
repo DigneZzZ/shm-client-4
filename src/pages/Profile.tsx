@@ -91,7 +91,6 @@ export default function Profile() {
           const telegramResponse = await telegramApi.getSettings();
           setTelegramUsername(telegramResponse.data.username || null);
         } catch {
-          // Telegram не настроен
         }
         try {
           const forecastResponse = await userApi.getForecast();
@@ -100,7 +99,6 @@ export default function Profile() {
             setForecast(forecastData[0]);
           }
         } catch {
-          // Прогноз не доступен
         }
         try {
           const paySystems = await userApi.getPaySystems();
@@ -110,7 +108,6 @@ export default function Profile() {
             setAutopayments(savedPayments);
           }
         } catch {
-          // Платёжные системы не доступны
         }
       } finally {
         setLoading(false);
@@ -154,7 +151,6 @@ export default function Profile() {
         setAutopayments(savedPayments);
       }
     } catch {
-      // Ignore
     }
   };
 
@@ -175,7 +171,6 @@ export default function Profile() {
         message: t('payments.paymentMethodDeleted', { name: autopaymentToDelete.name }),
         color: 'green',
       });
-      // Обновляем список с сервера
       refreshAutopayments();
     } catch {
       notifications.show({

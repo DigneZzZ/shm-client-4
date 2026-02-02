@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Card, Text, Stack, Group, Button, Modal, PasswordInput } from '@mantine/core';
-// import { Card, Text, Stack, Group, Button, Divider, Modal, PasswordInput } from '@mantine/core';
 import { IconShieldLock, IconLock } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
@@ -56,8 +55,8 @@ export default function SecuritySettings() {
         </Group>
 
         <Stack gap="lg">
-{/*
-          <OtpSettings embedded />
+
+          {/* <OtpSettings embedded />
 
           {hasTelegramWidget && (
             <>
@@ -71,7 +70,6 @@ export default function SecuritySettings() {
             </>
           )} */}
 
-          {/* Изменение пароля */}
           <Stack gap="xs">
             <Group gap="xs">
               <IconLock size={18} />

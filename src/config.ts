@@ -1,7 +1,3 @@
-// Runtime config from Docker environment or Vite env variables
-// В Docker: переменные берутся из window.__APP_CONFIG__ (генерируется entry.sh)
-// В dev режиме: используются VITE_ переменные из .env
-
 interface AppConfig {
   APP_NAME: string;
   TELEGRAM_BOT_NAME: string;
@@ -17,7 +13,6 @@ declare global {
   }
 }
 
-// Получаем конфиг: сначала из runtime (Docker), потом из build-time (Vite)
 function getConfig(): AppConfig {
   const runtimeConfig = window.__APP_CONFIG__;
 

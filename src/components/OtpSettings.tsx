@@ -197,7 +197,6 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
         </Card>
       )}
 
-      {/* Setup Modal */}
       <Modal
         opened={setupModalOpen}
         onClose={handleCloseSetup}
@@ -308,7 +307,6 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
         )}
       </Modal>
 
-      {/* QR Code Modal */}
       {setupData && (
         <QrModal
           opened={qrModalOpen}
@@ -318,7 +316,6 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
         />
       )}
 
-      {/* Disable Confirmation Modal */}
       <Modal
         opened={disableModalOpen}
         onClose={() => {

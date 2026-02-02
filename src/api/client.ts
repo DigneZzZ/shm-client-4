@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { getCookie, setCookie, removeCookie, extendCookie, getPartnerCookie, removePartnerCookie } from './cookie';
 
-// API client for SHM backend
 export const api = axios.create({
   baseURL: '/shm/v1',
   withCredentials: true,
@@ -23,7 +22,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    // Extend cookie on each successful response
     extendCookie();
     return response;
   },
@@ -45,7 +43,6 @@ export const auth = {
       ...(otpToken ? { otp_token: otpToken } : {})
     });
 
-    // Проверяем, требуется ли OTP
     if (response.data?.otp_required) {
       return { otpRequired: true };
     }
@@ -82,7 +79,6 @@ export const auth = {
     const sessionId = response.data?.session_id || response.data?.id;
     if (sessionId) {
       setCookie(sessionId);
-      // Remove partner cookie after successful auth/registration
       if (partnerId) {
         removePartnerCookie();
       }
@@ -97,7 +93,6 @@ export const auth = {
       data.partner_id = partnerId;
     }
     const response = await api.put('/user', data);
-    // Remove partner cookie after successful registration
     if (partnerId) {
       removePartnerCookie();
     }
@@ -123,7 +118,6 @@ export const auth = {
   },
 };
 
-// User API
 export const userApi = {
   getProfile: () => api.get('/user'),
   updateProfile: (data: Record<string, unknown>) => api.post('/user', data),
@@ -141,7 +135,6 @@ export const storageApi = {
   list: () => api.get('/storage/manage'),
 };
 
-// Services API
 export const servicesApi = {
   list: () => api.get('/service'),
   order_list: () => api.get('/service/order'),
@@ -149,19 +142,16 @@ export const servicesApi = {
   getOrderList: () => api.get('/service/order'),
 };
 
-// Telegram API
 export const telegramApi = {
   getSettings: () => api.get('/telegram/user'),
   updateSettings: (data: Record<string, unknown>) => api.post('/telegram/user', data),
 };
 
-// Promo API
 export const promoApi = {
   apply: (code: string) => api.get(`/promo/apply/${code}`),
   list: () => api.get('/promo'),
 };
 
-// Passkey API
 export interface PasskeyCredential {
   id: string;
   name: string;
@@ -198,14 +188,10 @@ export interface PasskeyAuthOptions {
 }
 
 export const passkeyApi = {
-  // list: () => api.get<{ data: { credentials: PasskeyCredential[]; enabled: boolean } }>('/user/passkey'),
-  list: () => api.get<{ data: { credentials: PasskeyCredential[]; enabled: boolean } }>('/user/passkey/list'),
-  // rename: (credentialId: string, name: string) => api.post('/user/passkey', { credential_id: credentialId, name }),
-  rename: (credentialId: string, name: string) => api.post('/user/passkey/rename', { credential_id: credentialId, name }),
-  // delete: (credentialId: string) => api.delete('/user/passkey/delete?credential_id=' + encodeURIComponent(credentialId)),
-  delete: (credentialId: string) => api.post('/user/passkey/delete', { credential_id: credentialId }),
-  // registerOptions: () => api.get<{ data: PasskeyRegisterOptions }>('/user/passkey/register'),
-  registerOptions: () => api.post<{ data: PasskeyRegisterOptions }>('/user/passkey/register/options', {}),
+  list: () => api.get<{ data: { credentials: PasskeyCredential[]; enabled: boolean } }>('/user/passkey'),
+  rename: (credentialId: string, name: string) => api.post('/user/passkey', { credential_id: credentialId, name }),
+  delete: (credentialId: string) => api.delete('/user/passkey?credential_id=' + encodeURIComponent(credentialId)),
+  registerOptions: () => api.get<{ data: PasskeyRegisterOptions }>('/user/passkey/register'),
   registerComplete: (data: {
     credential_id: string;
     rawId: string;
@@ -214,8 +200,7 @@ export const passkeyApi = {
       attestationObject: string;
     };
     name?: string;
-  }) => api.post('/user/passkey/register/complete', data),
-  // }) => api.post('/user/passkey/register', data),
+  }) => api.post('/user/passkey/register', data),
   // authOptionsPublic: () => api.get<{ data: PasskeyAuthOptions }>('/user/auth/passkey', {}),
   authOptionsPublic: () => api.post<{ data: PasskeyAuthOptions }>('/user/passkey/auth/options/public', {}),
   authPublic: (data: {
@@ -231,7 +216,6 @@ export const passkeyApi = {
   // }) => api.post<{ data: { id: string } }>('/user/auth/passkey', data),
 };
 
-// Tickets API
 export const ticketApi = {
   list: (status?: string) => api.get('/user/ticket', { params: status ? { status } : {} }),
   get: (ticketId: number) => api.get(`/user/ticket/${ticketId}`),
@@ -254,7 +238,6 @@ export const ticketApi = {
   close: (ticketId: number) => api.delete(`/user/ticket/${ticketId}`),
 };
 
-// OTP (2FA) API
 export interface OtpStatus {
   enabled: boolean;
   verified: boolean;
@@ -269,18 +252,13 @@ export interface OtpSetupResponse {
 }
 
 export const otpApi = {
-  // status: () => api.get<{ data: OtpStatus }>('/user/otp'),
-  status: () => api.get<{ data: OtpStatus }>('/user/otp/status'),
+  status: () => api.get<{ data: OtpStatus }>('/user/otp'),
   setup: () => api.post<{ data: OtpSetupResponse }>('/user/otp/setup'),
-  // enable: (token: string) => api.put('/user/otp', { token }),
-  enable: (token: string) => api.post('/user/otp/enable', { token }),
-  // disable: (token: string) => api.delete('/user/otp', { params: { token } }),
-  disable: (token: string) => api.post('/user/otp/disable', { token }),
-  // verify: (token: string) => api.post('/user/otp', { token }),
-  verify: (token: string) => api.post('/user/otp/verify', { token }),
+  enable: (token: string) => api.put('/user/otp', { token }),
+  disable: (token: string) => api.delete('/user/otp', { params: { token } }),
+  verify: (token: string) => api.post('/user/otp', { token }),
 };
 
-// Password Auth API
 export interface PasswordAuthStatus {
   password_auth_disabled: number;
   passkey_enabled: number;
@@ -288,10 +266,7 @@ export interface PasswordAuthStatus {
 }
 
 export const passwordAuthApi = {
-  // status: () => api.get<{ data: PasswordAuthStatus }>('/user/password-auth'),
-  status: () => api.get<{ data: PasswordAuthStatus }>('/user/password-auth/status'),
-  // disable: () => api.delete('/user/password-auth'),
-  disable: () => api.post('/user/password-auth/disable'),
-  // enable: () => api.post('/user/password-auth'),
-  enable: () => api.post('/user/password-auth/enable'),
+  status: () => api.get<{ data: PasswordAuthStatus }>('/user/password-auth'),
+  disable: () => api.delete('/user/password-auth'),
+  enable: () => api.post('/user/password-auth'),
 };

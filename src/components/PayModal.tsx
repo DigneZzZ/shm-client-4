@@ -42,14 +42,14 @@ export default function PayModal({ opened, onClose }: PayModalProps) {
       const seen = new Set<string>();
       const data = rawData
         .filter((ps: PaySystem) => {
-          if (seen.has(ps.paysystem)) return false;
-          seen.add(ps.paysystem);
+          if (seen.has(ps.shm_url)) return false;
+          seen.add(ps.shm_url);
           return true;
         })
         .sort((a: PaySystem, b: PaySystem) => (b.weight || 0) - (a.weight || 0));
       setPaySystems(data);
       if (data.length > 0) {
-        setSelectedPaySystem(data[0].paysystem);
+        setSelectedPaySystem(data[0].shm_url);
       }
       setLoaded(true);
     } catch {
@@ -94,7 +94,7 @@ export default function PayModal({ opened, onClose }: PayModalProps) {
   };
 
   const handlePay = async () => {
-    const paySystem = paySystems.find(ps => ps.paysystem === selectedPaySystem);
+    const paySystem = paySystems.find(ps => ps.shm_url === selectedPaySystem);
     if (!paySystem) {
       notifications.show({
         title: t('common.error'),
@@ -190,7 +190,7 @@ export default function PayModal({ opened, onClose }: PayModalProps) {
             <Select
               label={t('payments.paymentSystem')}
               placeholder={t('payments.selectPaymentSystem')}
-              data={paySystems.map(ps => ({ value: ps.paysystem, label: ps.name }))}
+              data={paySystems.map(ps => ({ value: ps.shm_url, label: ps.name }))}
               value={selectedPaySystem}
               onChange={setSelectedPaySystem}
             />

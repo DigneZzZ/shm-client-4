@@ -43,7 +43,6 @@ export default function Login() {
   const isWebAuthnSupported = !!window.PublicKeyCredential;
   const { isInsideTelegramWebApp, telegramWebApp } = useTelegramWebApp();
 
-  // Виджет показываем только если НЕ внутри WebApp
   const hasTelegramWidget = !isInsideTelegramWebApp && !!config.TELEGRAM_BOT_NAME && config.TELEGRAM_BOT_AUTH_ENABLE === 'true';
   const hasTelegramWebAppAuth = isInsideTelegramWebApp && config.TELEGRAM_WEBAPP_AUTH_ENABLE === 'true';
 
@@ -105,7 +104,6 @@ export default function Login() {
     try {
       await auth.register(formData.login, formData.password);
       notifications.show({ title: t('common.success'), message: t('auth.registerSuccess'), color: 'green' });
-      // Переключаемся на авторизацию, сохраняя логин
       setMode('login');
       setFormData({ ...formData, confirmPassword: '' });
     } catch {
@@ -124,18 +122,15 @@ export default function Login() {
     }
   };
 
-  // Авторизация через Telegram Login Widget
   const handleTelegramWidgetAuth = async (telegramUser: TelegramUser) => {
     setLoading(true);
     try {
-      // Отправляем данные виджета на бэкенд
       await auth.telegramWidgetAuth(telegramUser);
       const userResponse = await auth.getCurrentUser();
       const responseData = userResponse.data.data;
       const userData = Array.isArray(responseData) ? responseData[0] : responseData;
       setUser(userData);
 
-      // Сохраняем фото из данных Telegram виджета
       if (telegramUser.photo_url) {
         setTelegramPhoto(telegramUser.photo_url);
       }
@@ -242,7 +237,6 @@ export default function Login() {
             </Text>
           </div>
 
-          {/* WebApp: показываем сначала только кнопку Telegram */}
           {hasTelegramWebAppAuth && !showLoginForm && (
             <>
               <Button
@@ -267,7 +261,6 @@ export default function Login() {
             </>
           )}
 
-          {/* Виджет Telegram (не в WebApp) */}
           {hasTelegramWidget && (
             <>
               <Center>
@@ -283,7 +276,6 @@ export default function Login() {
             </>
           )}
 
-          {/* Форма логина/регистрации (не в WebApp или после нажатия кнопки) */}
           {(!hasTelegramWebAppAuth || showLoginForm) && (
             <>
               <form onSubmit={handleSubmit}>
@@ -352,7 +344,6 @@ export default function Login() {
                 )}
               </Text>
 
-              {/* Кнопка Telegram внизу формы (в WebApp) */}
               {hasTelegramWebAppAuth && showLoginForm && (
                 <>
                   <Divider label={t('common.or')} labelPosition="center" />
@@ -373,7 +364,6 @@ export default function Login() {
         </Stack>
       </Card>
 
-      {/* OTP Modal */}
       <Modal
         opened={showOtp}
         onClose={() => {

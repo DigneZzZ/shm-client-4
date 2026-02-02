@@ -20,8 +20,8 @@ interface MediaFile {
   name: string;
   type: string;
   size: number;
-  data: string; // base64
-  url?: string; // for displaying uploaded files
+  data: string;
+  url?: string;
 }
 
 interface TicketMessage {
@@ -105,15 +105,10 @@ function TicketList({
 }) {
   const { t } = useTranslation();
   const [showClosed, setShowClosed] = useState(false);
-
-  // Разделяем тикеты на активные и закрытые/архивные
   const activeTickets = tickets.filter(t => t.status !== 'closed' && t.status !== 'archived');
   const closedTickets = tickets.filter(t => t.status === 'closed' || t.status === 'archived');
-
-  // Проверяем есть ли новые сообщения от админа в тикете
   const hasNewMessages = (ticket: Ticket): boolean => {
     if (!ticket.messages || ticket.messages.length === 0) return false;
-    // Проверяем есть ли сообщения от админа после lastTicketCheck
     const hasNew = ticket.messages.some(msg => {
       if (msg.is_admin !== 1) return false;
       const msgTime = new Date(msg.created).getTime();
@@ -198,10 +193,8 @@ function TicketList({
 
   return (
     <Stack gap="sm">
-      {/* Активные тикеты */}
       {activeTickets.map(renderTicket)}
 
-      {/* Закрытые и архивные тикеты */}
       {closedTickets.length > 0 && (
         <>
           <UnstyledButton
@@ -230,7 +223,6 @@ function TicketList({
         </>
       )}
 
-      {/* Если нет активных тикетов, но есть закрытые */}
       {activeTickets.length === 0 && closedTickets.length > 0 && !showClosed && (
         <Center py="md">
           <Text size="sm" c="dimmed">{t('tickets.noActiveTickets')}</Text>
@@ -266,7 +258,6 @@ function TicketDetail({
     }
   };
 
-  // Scroll only when new messages appear
   useEffect(() => {
     if (messages.length > prevMessageCount.current) {
       scrollToBottom();
@@ -279,7 +270,6 @@ function TicketDetail({
       const response = await ticketApi.get(ticket.ticket_id);
       const ticketData = response.data?.data?.[0] || response.data?.data || response.data;
       if (ticketData) {
-        // Update ticket status and other fields
         setTicket(prev => ({
           ...prev,
           status: ticketData.status,
@@ -296,12 +286,10 @@ function TicketDetail({
     }
   };
 
-  // Initial load
   useEffect(() => {
     loadTicketData();
   }, [initialTicket.ticket_id]);
 
-  // Polling for new messages every 5 seconds (only for open tickets)
   useEffect(() => {
     const isClosed = ticket.status === 'closed' || ticket.status === 'archived';
     if (isClosed) return;
@@ -325,7 +313,6 @@ function TicketDetail({
         continue;
       }
 
-      // Проверяем расширение файла
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       const isAllowedExt = allowedExtensions.includes(ext);
       const isAllowedType = imageTypes.includes(file.type) || file.type === 'application/pdf';
@@ -339,7 +326,6 @@ function TicketDetail({
         continue;
       }
 
-      // Read as base64
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = (reader.result as string).split(',')[1];
@@ -371,7 +357,6 @@ function TicketDetail({
       );
       setNewMessage('');
       setAttachedFiles([]);
-      // Reload messages
       const response = await ticketApi.get(ticket.ticket_id);
       const ticketData = response.data?.data?.[0] || response.data?.data || response.data;
       if (ticketData?.messages) {
@@ -420,7 +405,6 @@ function TicketDetail({
       height: 'calc(100vh - 120px)',
       position: 'relative'
     }}>
-      {/* Header - fixed */}
       <Paper p="md" withBorder style={{ flexShrink: 0 }}>
         <Group justify="space-between">
           <Group>
@@ -461,7 +445,6 @@ function TicketDetail({
         </Group>
       </Paper>
 
-      {/* Messages - scrollable */}
       <ScrollArea
         style={{ flex: 1, minHeight: 0 }}
         viewportRef={scrollAreaRef}
@@ -481,7 +464,6 @@ function TicketDetail({
                 radius="md"
                 bg={msg.is_admin ? 'var(--mantine-color-gray-light)' : 'var(--mantine-color-blue-light)'}
               >
-                {/* Media attachments */}
                 {msg.media && msg.media.length > 0 && (
                   <Stack gap="xs" mb="xs">
                     {msg.media.map((file, idx) => {
@@ -521,10 +503,8 @@ function TicketDetail({
         </Stack>
       </ScrollArea>
 
-      {/* Input - fixed */}
       {!isClosed && (
         <Paper p="md" withBorder style={{ flexShrink: 0 }}>
-          {/* Attached files preview */}
           {attachedFiles.length > 0 && (
             <Group gap="xs" mb="sm" wrap="wrap">
               {attachedFiles.map((file, index) => {
@@ -621,7 +601,6 @@ function CreateTicketModal({
   const [loadingServices, setLoadingServices] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Загружаем услуги пользователя при открытии модалки
   useEffect(() => {
     if (opened) {
       setLoadingServices(true);
@@ -635,7 +614,6 @@ function CreateTicketModal({
     }
   }, [opened]);
 
-  // Сбрасываем user_service_id при смене типа тикета
   useEffect(() => {
     if (ticketType !== 'service') {
       setUserServiceId(null);
@@ -796,7 +774,6 @@ export default function Tickets() {
 
   const handleTicketSelect = (ticket: Ticket) => {
     setSelectedTicket(ticket);
-    // Обновляем время последней проверки при открытии тикета
     setLastTicketCheck(Date.now());
   };
 

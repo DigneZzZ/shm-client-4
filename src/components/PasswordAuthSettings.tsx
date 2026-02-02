@@ -25,7 +25,6 @@ export default function PasswordAuthSettings({ embedded = false }: PasswordAuthS
       const statusData = Array.isArray(data) ? data[0] : data;
       setStatus(statusData);
     } catch {
-      // Ошибка загрузки статуса - скрываем компонент
       setStatus(null);
     } finally {
       setLoading(false);
@@ -79,14 +78,11 @@ export default function PasswordAuthSettings({ embedded = false }: PasswordAuthS
     }
   };
 
-  // Не показываем компонент пока загружается или если не удалось загрузить статус
   if (loading || !status) {
     return null;
   }
 
-  // Не показываем если passkey не настроен
   if (!status.passkey_enabled) {
-    // В embedded режиме возвращаем null без Divider
     return null;
   }
 

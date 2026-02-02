@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { passkeyApi, PasskeyCredential } from '../api/client';
 import ConfirmModal from './ConfirmModal';
 
-// Утилиты для работы с WebAuthn
 function base64UrlToArrayBuffer(base64url: string): ArrayBuffer {
   const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
   const padding = '='.repeat((4 - (base64.length % 4)) % 4);
@@ -43,8 +42,6 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
   const [credentialToRename, setCredentialToRename] = useState<PasskeyCredential | null>(null);
   const [newName, setNewName] = useState('');
   const [renaming, setRenaming] = useState(false);
-
-  // Проверяем поддержку WebAuthn
   const isWebAuthnSupported = !!window.PublicKeyCredential;
 
   const loadCredentials = async () => {
@@ -54,7 +51,6 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
       const passkeyData = Array.isArray(data) ? data[0] : data;
       setCredentials(passkeyData?.credentials || []);
     } catch {
-      // Passkey не настроен
       setCredentials([]);
     } finally {
       setLoading(false);
@@ -81,12 +77,9 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
 
     setRegistering(true);
     try {
-      // Получаем опции регистрации
       const optionsResponse = await passkeyApi.registerOptions();
       const optionsData = optionsResponse.data.data;
       const options = Array.isArray(optionsData) ? optionsData[0] : optionsData;
-
-      // Преобразуем данные для WebAuthn API
       const publicKeyCredentialCreationOptions: PublicKeyCredentialCreationOptions = {
         challenge: base64UrlToArrayBuffer(options.challenge),
         rp: {
@@ -115,7 +108,6 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
         },
       };
 
-      // Создаём credential
       const credential = await navigator.credentials.create({
         publicKey: publicKeyCredentialCreationOptions,
       }) as PublicKeyCredential;
@@ -126,7 +118,6 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
 
       const response = credential.response as AuthenticatorAttestationResponse;
 
-      // Отправляем на сервер
       await passkeyApi.registerComplete({
         credential_id: arrayBufferToBase64Url(credential.rawId),
         rawId: arrayBufferToBase64Url(credential.rawId),
@@ -141,8 +132,6 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
         message: t('passkey.registerSuccess'),
         color: 'green',
       });
-
-      // Обновляем список
       loadCredentials();
     } catch (error: any) {
       console.error('Passkey registration error:', error);

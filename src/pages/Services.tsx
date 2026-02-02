@@ -153,7 +153,6 @@ function ServiceDetail({ service, onDelete }: ServiceDetailProps) {
               setSubscriptionUrl(url);
             }
           } catch {
-            // Нет subscription URL
           }
         }
       } else if (category === 'vpn') {
@@ -165,7 +164,6 @@ function ServiceDetail({ service, onDelete }: ServiceDetailProps) {
           }
           setActiveTab('config');
         } catch {
-          // Нет конфигурации
         }
       }
       setLoading(false);
@@ -346,7 +344,6 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false }:
   if (isChild) {
     return (
       <Group gap={0} wrap="nowrap" align="stretch">
-        {/* Вертикальная и горизонтальная линия дерева */}
         <Box
           style={{
             width: 24,
@@ -354,7 +351,6 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false }:
             flexShrink: 0,
           }}
         >
-          {/* Вертикальная линия */}
           <Box
             style={{
               position: 'absolute',
@@ -365,7 +361,6 @@ function ServiceCard({ service, onClick, isChild = false, isLastChild = false }:
               backgroundColor: 'var(--mantine-color-gray-4)',
             }}
           />
-          {/* Горизонтальная линия */}
           <Box
             style={{
               position: 'absolute',
@@ -476,7 +471,6 @@ export default function Services() {
     }
   };
 
-  // Проверяем есть ли услуги в процессе (включая дочерние)
   const hasProgressServices = (serviceList: UserService[]): boolean => {
     for (const service of serviceList) {
       if (service.status === 'PROGRESS') return true;
@@ -485,7 +479,6 @@ export default function Services() {
     return false;
   };
 
-  // Проверяем есть ли неоплаченные услуги (включая дочерние)
   const hasNotPaidServices = (serviceList: UserService[]): boolean => {
     for (const service of serviceList) {
       if (service.status === 'NOT PAID') return true;
@@ -498,7 +491,6 @@ export default function Services() {
     fetchServices();
   }, []);
 
-  // Автообновление если есть услуги в статусе PROGRESS (1 сек, 3 сек)
   useEffect(() => {
     if (!services.length || loading) return;
 
@@ -513,13 +505,11 @@ export default function Services() {
       return () => clearTimeout(timer);
     }
 
-    // Сбрасываем счётчик если нет PROGRESS услуг
     if (!hasProgress) {
       refreshAttemptsRef.current = 0;
     }
   }, [services, loading]);
 
-  // Фоновое обновление каждые 5 сек если есть NOT PAID услуги
   useEffect(() => {
     if (!services.length || loading) return;
 

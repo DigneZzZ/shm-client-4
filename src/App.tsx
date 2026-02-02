@@ -61,7 +61,6 @@ function ThemeToggle() {
   );
 }
 
-// Верхняя панель для WebApp
 function WebAppHeader() {
   const navigate = useNavigate();
   const { logout } = useStore();
@@ -114,7 +113,6 @@ function WebAppHeader() {
   );
 }
 
-// Нижняя навигация для WebApp
 function BottomNavigation() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -197,14 +195,12 @@ function AppContent() {
     }
   };
 
-  // Инициализация Telegram WebApp
   useEffect(() => {
     const tgWebApp = window.Telegram?.WebApp;
     if (tgWebApp && isTelegramWebApp) {
       tgWebApp.ready();
       tgWebApp.expand();
 
-      // Устанавливаем цвета
       if (tgWebApp.setHeaderColor) {
         tgWebApp.setHeaderColor('secondary_bg_color');
       }
@@ -214,7 +210,6 @@ function AppContent() {
     }
   }, [isTelegramWebApp]);
 
-  // BackButton для Telegram WebApp
   useEffect(() => {
     const tgWebApp = window.Telegram?.WebApp;
     if (!tgWebApp || !isTelegramWebApp) return;
@@ -222,7 +217,6 @@ function AppContent() {
     const backButton = tgWebApp.BackButton;
     if (!backButton) return;
 
-    // Показываем BackButton если не на главной странице (профиль)
     const isMainPage = location.pathname === '/' || location.pathname === '';
 
     if (isMainPage) {
@@ -244,7 +238,6 @@ function AppContent() {
     const checkAuth = async () => {
       const token = getCookie();
 
-      // Обычная проверка токена
       if (!token) {
         setIsLoading(false);
         return;
@@ -265,7 +258,6 @@ function AppContent() {
     checkAuth();
   }, [setUser, setIsLoading]);
 
-  // Show loading spinner while checking auth
   if (isLoading) {
     return (
       <Center h="100vh">
@@ -274,12 +266,10 @@ function AppContent() {
     );
   }
 
-  // Show login page if not authenticated
   if (!isAuthenticated) {
     return <Login />;
   }
 
-  // WebApp layout - без боковой панели, с нижней навигацией
   if (isTelegramWebApp) {
     return (
       <Box style={{ minHeight: '100vh', paddingBottom: 100 }}>
@@ -298,7 +288,6 @@ function AppContent() {
     );
   }
 
-  // Обычный desktop layout
   return (
     <AppShell
       header={{ height: 60 }}
