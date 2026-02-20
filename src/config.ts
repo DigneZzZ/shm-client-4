@@ -1,18 +1,18 @@
 interface AppConfig {
   APP_NAME: string;
-  TELEGRAM_BOT_NAME?: string;
+  TELEGRAM_BOT_NAME: string;
   TELEGRAM_BOT_AUTH_ENABLE: string;
   TELEGRAM_WEBAPP_AUTH_ENABLE: string;
   TELEGRAM_WEBAPP_AUTO_AUTH_ENABLE: string;
-  TELEGRAM_WEBAPP_PROFILE?: string;
-  SUPPORT_LINK?: string;
-  SHM_BASE_PATH?: string;
+  TELEGRAM_WEBAPP_PROFILE: string;
+  SUPPORT_LINK: string;
+  SHM_BASE_PATH: string;
   OTP_ENABLE: string;
   PASSKEY_ENABLE: string;
-  BITRIX_WIDGET_SCRIPT_URL?: string;
-  PROXY_CATEGORY?: string;
+  BITRIX_WIDGET_SCRIPT_URL: string;
+  PROXY_CATEGORY: string;
   PROXY_STORAGE_PREFIX?: string;
-  VPN_CATEGORY?: string;
+  VPN_CATEGORY: string;
   VPN_STORAGE_PREFIX?: string;
 }
 
