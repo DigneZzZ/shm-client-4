@@ -80,7 +80,7 @@ jobs:
           target: client
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/shm-client:${{ steps.version.outputs.minor }}
-            ${{ steps.version.outputs.push_latest == 'true' && format('{0}/shm-client:latest', secrets.DOCKERHUB_USERNAME) || format('{0}/shm-client:skip-latest-{1}', secrets.DOCKERHUB_USERNAME, steps.version.outputs.rev) }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/shm-client-2:${{ steps.version.outputs.minor }}
+            ${{ steps.version.outputs.push_latest == 'true' && format('{0}/shm-client-2:latest', secrets.DOCKERHUB_USERNAME) || format('{0}/shm-client-2:skip-latest-{1}', secrets.DOCKERHUB_USERNAME, steps.version.outputs.rev) }}
           cache-from: type=gha,scope=client
           cache-to: type=gha,mode=max,scope=client
