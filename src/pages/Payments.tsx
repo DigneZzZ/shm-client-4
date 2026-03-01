@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Card, Text, Stack, Group, Badge, Button, Loader, Center, Paper, Title, Table, Pagination, LoadingOverlay } from '@mantine/core';
+import { Card, Text, Stack, Group, Badge, Button, Loader, Center, Paper, Title, Pagination, LoadingOverlay } from '@mantine/core';
 import { IconCreditCard, IconPlus } from '@tabler/icons-react';
+import DataTable, { Column } from '../components/DataTable';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client';
 import { useStore } from '../store/useStore';
@@ -21,15 +22,27 @@ export default function Payments() {
   const [totalItems, setTotalItems] = useState(0);
   const [payModalOpen, setPayModalOpen] = useState(false);
   const perPage = 10;
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc'|'desc'>('asc');
   const { user } = useStore();
   const { t, i18n } = useTranslation();
 
-  const fetchPayments = async (p: number, isInitial = false) => {
+  const fetchPayments = async (
+    p: number,
+    isInitial = false,
+    field?: string,
+    direction?: 'asc'|'desc',
+  ) => {
     if (isInitial) setInitialLoading(true);
     else setTableLoading(true);
     try {
       const offset = (p - 1) * perPage;
-      const response = await api.get('/user/pay', { params: { limit: perPage, offset } });
+      const params: any = { limit: perPage, offset };
+      if (field) {
+        params.sort_field = field;
+        params.sort_direction = direction || sortDirection;
+      }
+      const response = await api.get('/user/pay', { params });
       setPayments(response.data.data || []);
       if (typeof response.data.items === 'number') {
         setTotalItems(response.data.items);
@@ -43,17 +56,26 @@ export default function Payments() {
   };
 
   useEffect(() => {
-    fetchPayments(1, true);
-  }, []);
+    fetchPayments(1, true, sortField, sortDirection);
+  }, [sortField, sortDirection]);
 
   useEffect(() => {
     if (!initialLoading) {
-      fetchPayments(page);
+      fetchPayments(page, false, sortField, sortDirection);
     }
-  }, [page]);
+  }, [page, sortField, sortDirection]);
 
   const totalPages = Math.ceil(totalItems / perPage);
 
+  const columns: Column<Payment>[] = [
+    { title: t('payments.date'), accessor: (p) => p.date ? new Date(p.date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US') : '-', sortable: true, sortKey: 'date' },
+    { title: t('payments.paymentSystem'), accessor: 'pay_system_id' },
+    { title: t('payments.amount'), accessor: (p) => (
+        <Text size="sm" fw={500} c={p.money > 0 ? 'green' : 'red'}>
+          {p.money > 0 ? '+' : ''}{p.money} {t('common.currency')}
+        </Text>
+      ), align: 'right', sortable: true, sortKey: 'money' },
+  ];
   if (initialLoading) {
     return (
       <Center h={300}>
@@ -97,38 +119,17 @@ export default function Payments() {
         <>
           <Paper withBorder radius="md" style={{ overflow: 'hidden', position: 'relative' }}>
             <LoadingOverlay visible={tableLoading} overlayProps={{ blur: 1 }} />
-            <Table.ScrollContainer minWidth={500}>
-              <Table striped highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>{t('payments.date')}</Table.Th>
-                    <Table.Th>{t('payments.paymentSystem')}</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>{t('payments.amount')}</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {payments.map((payment) => (
-                    <Table.Tr key={payment.id}>
-                      <Table.Td>
-                        <Text size="sm">{new Date(payment.date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">{payment.pay_system_id || '-'}</Text>
-                      </Table.Td>
-                      <Table.Td style={{ textAlign: 'right' }}>
-                        <Text
-                          size="sm"
-                          fw={500}
-                          c={payment.money > 0 ? 'green' : 'red'}
-                        >
-                          {payment.money > 0 ? '+' : ''}{payment.money} {t('common.currency')}
-                        </Text>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
+            <DataTable
+              data={payments}
+              columns={columns}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={(field, dir) => {
+                setSortField(field);
+                setSortDirection(dir);
+                setPage(1);
+              }}
+            />
           </Paper>
 
           {totalPages > 1 && (
@@ -138,7 +139,6 @@ export default function Payments() {
           )}
         </>
       )}
-
       <PayModal opened={payModalOpen} onClose={() => setPayModalOpen(false)} />
     </Stack>
   );

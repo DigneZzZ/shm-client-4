@@ -29,9 +29,10 @@ function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
 
 interface PasskeySettingsProps {
   embedded?: boolean;
+  isActive?: boolean;
 }
 
-export default function PasskeySettings({ embedded = false }: PasskeySettingsProps) {
+export default function PasskeySettings({ embedded = false, isActive = true }: PasskeySettingsProps) {
   const { t } = useTranslation();
   const [credentials, setCredentials] = useState<PasskeyCredential[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,12 +65,15 @@ export default function PasskeySettings({ embedded = false }: PasskeySettingsPro
       setLoading(false);
       return;
     }
-    if (isWebAuthnSupported) {
+    if (isWebAuthnSupported && isActive) {
+      if (!isActive) {
+        return;
+      }
       loadCredentials();
     } else {
       setLoading(false);
     }
-  }, [isWebAuthnSupported]);
+  }, [isWebAuthnSupported, isActive]);
 
   const handleRegister = async () => {
     if (!isWebAuthnSupported) {

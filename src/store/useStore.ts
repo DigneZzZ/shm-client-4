@@ -6,8 +6,6 @@ interface User {
   login: string;
   full_name?: string;
   phone?: string;
-  email?: string;
-  email_verified?: number;
   balance: number;
   credit: number;
   discount: number;

@@ -13,6 +13,7 @@ interface OrderService {
   cost: number;
   real_cost?: number;
   cost_discount?: number;
+  cost_bonus?: number;
   discount?: number;
   period: number;
   descr: string;
@@ -337,20 +338,27 @@ export default function OrderServiceModal({
                         <Text fw={600} size="lg" style={{ textDecoration: 'line-through', color: '#999' }}>
                           {selectedService.cost} ₽
                         </Text>
-                        <Badge color="green" variant="light" size="sm">
-                          -{selectedService.discount}%
-                        </Badge>
                       </>
                     ) : null}
                     <Text fw={600} size="lg" color={selectedService.discount && selectedService.discount > 0 ? 'green' : undefined}>
                       {selectedService.real_cost || selectedService.cost} ₽
                     </Text>
                   </Group>
-                  {selectedService.cost_discount && selectedService.cost_discount > 0 && (
+                  {selectedService.cost_discount && selectedService.cost_discount > 0 && selectedService.cost_bonus === 0  ? (
                     <Text size="xs" c="dimmed" mt="xs">
                       {t('services.savings', { amount: selectedService.cost_discount })}
                     </Text>
-                  )}
+                  ) : null}
+                  {selectedService.cost_bonus && selectedService.cost_bonus > 0 && selectedService.cost_discount === 0 ? (
+                    <Text size="xs" c="dimmed" mt="xs">
+                      {t('services.savings_bonus', { amount: selectedService.cost_bonus })}
+                    </Text>
+                  ) : null}
+                  {selectedService.cost_discount && selectedService.cost_discount > 0 && selectedService.cost_bonus && selectedService.cost_bonus > 0  ? (
+                    <Text size="xs" c="dimmed" mt="xs">
+                      {t('services.profit', { amount: selectedService.cost_bonus + selectedService.cost_discount })}
+                    </Text>
+                  ) : null}
                 </div>
                 <div>
                   <Text size="sm" c="dimmed">{t('order.period')}</Text>
@@ -498,17 +506,14 @@ export default function OrderServiceModal({
                         )}
                       </div>
                       <Group gap="sm" align="baseline">
-                        {service.discount && service.discount > 0 ? (
+                        {service.discount && service.discount > 0 || service.cost_bonus ? (
                           <>
                             <Text size="sm" c="dimmed" style={{ textDecoration: 'line-through' }}>
                               {service.cost} ₽
                             </Text>
-                            <Badge color="green" variant="light" size="xs">
-                              -{service.discount}%
-                            </Badge>
                           </>
                         ) : null}
-                        <Text fw={600} color={service.discount && service.discount > 0 ? 'green' : undefined}>
+                        <Text fw={600} color={service.discount && service.discount > 0 || service.cost_bonus ? 'green' : undefined}>
                           {service.real_cost || service.cost} ₽
                         </Text>
                         <Text size="xs" c="dimmed">

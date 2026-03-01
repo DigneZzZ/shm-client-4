@@ -10,9 +10,10 @@ import { config } from '../../config';
 
 interface OtpSettingsProps {
   embedded?: boolean;
+  isActive?: boolean;
 }
 
-export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
+export default function OtpSettings({ embedded = false, isActive = true }: OtpSettingsProps) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<OtpStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,8 +46,11 @@ export default function OtpSettings({ embedded = false }: OtpSettingsProps) {
       setLoading(false);
       return;
     }
+    if (!isActive) {
+      return;
+    }
     loadStatus();
-  }, []);
+  }, [isActive]);
 
   const handleSetup = async () => {
     try {

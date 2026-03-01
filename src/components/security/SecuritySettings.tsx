@@ -18,6 +18,7 @@ export default function SecuritySettings() {
   const { t } = useTranslation();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [activeTab, setActiveTab] = useState<string | null>('password');
   const { isInsideTelegramWebApp } = useTelegramWebApp();
   const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -59,7 +60,7 @@ export default function SecuritySettings() {
           <Text fw={600} size="lg">{t('profile.security')}</Text>
         </Group>
 
-        <Tabs defaultValue={'password'} variant="outline" >
+        <Tabs defaultValue={'password'} variant="outline" value={activeTab} onChange={setActiveTab}>
           <Tabs.List grow>
             <Tabs.Tab value="password" leftSection={<IconLock size={14} />}>
               {isMobile ? undefined : t('profile.changePassword')}
@@ -85,19 +86,19 @@ export default function SecuritySettings() {
 
           {otpEnabled && (
             <Tabs.Panel value="otp">
-              <OtpSettings embedded />
+              <OtpSettings embedded isActive={activeTab === 'otp'} />
             </Tabs.Panel>
           )}
 
           {passkeyEnabled && hasTelegramWidget && (
             <Tabs.Panel value="passkey">
-              <PasskeySettings embedded />
+              <PasskeySettings embedded isActive={activeTab === 'passkey'} />
             </Tabs.Panel>
           )}
 
           {hasTelegramWidget && (
             <Tabs.Panel value="passwordAuth">
-              <PasswordAuthSettings embedded />
+              <PasswordAuthSettings embedded isActive={activeTab === 'passwordAuth'} />
             </Tabs.Panel>
           )}
 
@@ -121,6 +122,8 @@ export default function SecuritySettings() {
             </Stack>
           </Tabs.Panel>
         </Tabs>
+
+      <Space h="md" />
       </Card>
 
       <Space h="xl" />

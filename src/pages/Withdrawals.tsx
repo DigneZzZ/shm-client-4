@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, Stack, Loader, Center, Paper, Title, Table, Pagination, Badge, LoadingOverlay } from '@mantine/core';
+import { Text, Stack, Loader, Center, Paper, Title, Pagination, Badge, LoadingOverlay } from '@mantine/core';
+import DataTable, { Column } from '../components/DataTable';
 import { api } from '../api/client';
 
 interface Withdraw {
@@ -27,12 +28,26 @@ export default function Withdrawals() {
   const [totalItems, setTotalItems] = useState(0);
   const perPage = 10;
 
-  const fetchWithdrawals = async (p: number, isInitial = false) => {
+  // sorting
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const fetchWithdrawals = async (
+    p: number,
+    isInitial = false,
+    field?: string,
+    direction?: 'asc' | 'desc',
+  ) => {
     if (isInitial) setInitialLoading(true);
     else setTableLoading(true);
     try {
       const offset = (p - 1) * perPage;
-      const response = await api.get('/user/withdraw', { params: { limit: perPage, offset } });
+      const params: any = { limit: perPage, offset };
+      if (field) {
+        params.sort_field = field;
+        params.sort_direction = direction || sortDirection;
+      }
+      const response = await api.get('/user/withdraw', { params });
       setWithdrawals(response.data.data || []);
       if (typeof response.data.items === 'number') {
         setTotalItems(response.data.items);
@@ -46,17 +61,27 @@ export default function Withdrawals() {
   };
 
   useEffect(() => {
-    fetchWithdrawals(1, true);
-  }, []);
+    fetchWithdrawals(1, true, sortField, sortDirection);
+  }, [sortField, sortDirection]);
 
   useEffect(() => {
     if (!initialLoading) {
-      fetchWithdrawals(page);
+      fetchWithdrawals(page, false, sortField, sortDirection);
     }
-  }, [page]);
+  }, [page, sortField, sortDirection]);
 
   const totalPages = Math.ceil(totalItems / perPage);
 
+  const columns: Column<Withdraw>[] = [
+    { title: 'ID', accessor: 'withdraw_id' },
+    { title: t('withdrawals.withdrawDate'), accessor: (w) => w.withdraw_date ? new Date(w.withdraw_date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US') : '-', sortable: true, sortKey: 'withdraw_date', },
+    { title: t('withdrawals.endDate'), accessor: (w) => w.end_date ? new Date(w.end_date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US') : '-', sortable: true, sortKey: 'end_date', },
+    { title: t('services.cost'), accessor: (w) => <Text size="sm">{w.cost} ₽</Text>, sortable: true, sortKey: 'cost' },
+    { title: t('payments.discount'), accessor: (w) => w.discount > 0 ? <Text size="sm" c="green">-{w.discount}%</Text> : <Text size="sm" c="dimmed">-</Text>, sortable: true, sortKey: 'discount' },
+    { title: t('profile.bonus'), accessor: (w) => w.bonus > 0 ? <Text size="sm" c="red">-{w.bonus} ₽</Text> : <Text size="sm" c="dimmed">-</Text>, sortable: true, sortKey: 'bonus' },
+    { title: t('withdrawals.total'), accessor: (w) => <Text size="sm" fw={500} w={80} c="red">-{w.total} ₽</Text>, sortable: true, sortKey: 'total'},
+    { title: t('order.period'), accessor: (w) => <Badge variant="light" color="blue">{w.months} {t('common.months')} × {w.qnt}</Badge>, sortable: true, sortKey: 'months' },
+  ];
   if (initialLoading) {
     return (
       <Center h={300}>
@@ -79,66 +104,17 @@ export default function Withdrawals() {
         <>
           <Paper withBorder radius="md" style={{ overflow: 'hidden', position: 'relative' }}>
             <LoadingOverlay visible={tableLoading} overlayProps={{ blur: 1 }} />
-            <Table.ScrollContainer minWidth={600}>
-              <Table striped highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>ID</Table.Th>
-                    <Table.Th>{t('withdrawals.withdrawDate')}</Table.Th>
-                    <Table.Th>{t('withdrawals.endDate')}</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>{t('services.cost')}</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>{t('payments.discount')}</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>{t('profile.bonus')}</Table.Th>
-                    <Table.Th style={{ textAlign: 'right' }}>{t('withdrawals.total')}</Table.Th>
-                    <Table.Th>{t('order.period')}</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {withdrawals.map((w) => (
-                    <Table.Tr key={w.withdraw_id}>
-                      <Table.Td>
-                        <Text size="sm">{w.withdraw_id}</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">
-                          {w.withdraw_date ? new Date(w.withdraw_date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US') : '-'}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Text size="sm">
-                          {w.end_date ? new Date(w.end_date).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US') : '-'}
-                        </Text>
-                      </Table.Td>
-                      <Table.Td style={{ textAlign: 'right' }}>
-                        <Text size="sm">{w.cost} ₽</Text>
-                      </Table.Td>
-                      <Table.Td style={{ textAlign: 'right' }}>
-                        {w.discount > 0 ? (
-                          <Text size="sm" c="green">-{w.discount}%</Text>
-                        ) : (
-                          <Text size="sm" c="dimmed">-</Text>
-                        )}
-                      </Table.Td>
-                      <Table.Td style={{ textAlign: 'right' }}>
-                        {w.bonus > 0 ? (
-                          <Text size="sm" c="red">-{w.bonus} ₽</Text>
-                        ) : (
-                          <Text size="sm" c="dimmed">-</Text>
-                        )}
-                      </Table.Td>
-                      <Table.Td style={{ textAlign: 'right' }}>
-                        <Text size="sm" fw={500} w={80} c="red">-{w.total} ₽</Text>
-                      </Table.Td>
-                      <Table.Td>
-                        <Badge variant="light" color="blue">
-                          {w.months} {t('common.months')} × {w.qnt}
-                        </Badge>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
+            <DataTable
+              data={withdrawals}
+              columns={columns}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={(field, dir) => {
+                setSortField(field);
+                setSortDirection(dir);
+                setPage(1);
+              }}
+            />
           </Paper>
 
           {totalPages > 1 && (
@@ -147,7 +123,6 @@ export default function Withdrawals() {
             </Center>
           )}
         </>
-      )}
-    </Stack>
+      )}    </Stack>
   );
 }

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, Tooltip, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, useMantineColorScheme } from '@mantine/core';
+import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, Tooltip, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, Skeleton, useMantineColorScheme } from '@mantine/core';
 import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconCreditCard, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
-import { userApi, telegramApi } from '../api/client';
+import { userApi, telegramApi, userEmailApi } from '../api/client';
 import PayModal from '../components/PayModal';
 import PromoModal from '../components/PromoModal';
 import SecuritySettings from '../components/security/SecuritySettings';
@@ -18,8 +18,6 @@ interface UserProfile {
   login: string;
   full_name?: string;
   phone?: string;
-  email?: string;
-  email_verified?: number;
   balance: number;
   credit: number;
   discount: number;
@@ -54,6 +52,7 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({ full_name: '', phone: '' });
   const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
+  const [telegramLoading, setTelegramLoading] = useState(false);
   const [payModalOpen, setPayModalOpen] = useState(false);
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [telegramModalOpen, setTelegramModalOpen] = useState(false);
@@ -100,17 +99,10 @@ export default function Profile() {
         const responseData = response.data.data;
         const data = Array.isArray(responseData) ? responseData[0] : responseData;
         setProfile(data);
-        setUserEmail(data.email || null);
-        setEmailVerified(data.email_verified || 0 );
         setFormData({
           full_name: data.full_name || '',
           phone: data.phone || ''
         });
-        try {
-          const telegramResponse = await telegramApi.getSettings();
-          setTelegramUsername(telegramResponse.data.username || null);
-        } catch {
-        }
         try {
           const forecastResponse = await userApi.getForecast();
           const forecastData = forecastResponse.data.data;
@@ -125,6 +117,33 @@ export default function Profile() {
     };
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    if (!profile) return;
+
+    const loadExtras = async () => {
+      setTelegramLoading(true);
+      try {
+        const telegramResponse = await telegramApi.getSettings();
+        setTelegramUsername(telegramResponse.data.username || null);
+      } catch {
+      } finally {
+        setTelegramLoading(false);
+      }
+
+      try {
+        const emailResponse = await userEmailApi.getEmail();
+        const responseData = emailResponse.data.data;
+        const data = Array.isArray(responseData) ? responseData[0] : responseData;
+        setUserEmail(data.email || null);
+        setEmailVerified(data.email_verified || 0 );
+      } catch {
+      } finally {
+      }
+    };
+
+    loadExtras();
+  }, [profile]);
 
   const handleSave = async () => {
     try {
@@ -203,10 +222,10 @@ export default function Profile() {
   const handleSaveEmail = async () => {
     const email = emailInput.trim();
 
-    if (!isValidEmail(email)) {
+    if (email === userEmail) {
       notifications.show({
         title: t('common.error'),
-        message: t('profile.invalidEmail'),
+        message: t('profile.isCurrentEmail'),
         color: 'red',
       });
       return;
@@ -214,7 +233,7 @@ export default function Profile() {
 
     setEmailSaving(true);
     try {
-      const response = await userApi.setEmail(email);
+      const response = await userEmailApi.setEmail(email);
       const data = response.data?.data;
 
       if (Array.isArray(data) && data[0]?.msg && data[0].msg !== 'Successful') {
@@ -251,7 +270,7 @@ export default function Profile() {
 
     setVerifySending(true);
     try {
-      const response = await userApi.sendVerifyCode(userEmail);
+      const response = await userEmailApi.sendVerifyCode(userEmail);
       const data = response.data?.data;
 
       if (Array.isArray(data) && data[0]?.msg && data[0].msg !== 'Verification code sent') {
@@ -289,7 +308,7 @@ export default function Profile() {
 
     setVerifyConfirming(true);
     try {
-      const response = await userApi.confirmEmail(verifyCode.trim());
+      const response = await userEmailApi.confirmEmail(verifyCode.trim());
       const data = response.data?.data;
 
       if (Array.isArray(data) && data[0]?.msg && data[0].msg !== 'Email verified successfully') {
@@ -404,7 +423,7 @@ export default function Profile() {
                         {item.total.toFixed(2)} {t('common.currency')}
                       </Text>
                       <Text size="xs" c={item.status === 'NOT PAID' ? 'red' : 'green'}>
-                        {item.status === 'NOT PAID' ? t('profile.notPaid') : item.status}
+                        {t(`status.${item.status}`)}
                       </Text>
                     </div>
                   </Group>
@@ -488,25 +507,25 @@ export default function Profile() {
           <Card withBorder radius="md" p="lg" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Group justify="space-between" mb="md">
               <Text fw={500}>Email</Text>
-              <Group gap="xs">
-                {userEmail && !emailVerified && (
-                  <Button
-                    variant="light"
-                    size="xs"
-                    color="orange"
-                    onClick={handleSendVerifyCode}
-                    loading={verifySending}
-                    disabled={resendCooldown > 0}
-                  >
-                    {resendCooldown > 0
-                      ? `${t('profile.verify')} (${Math.floor(resendCooldown / 60)}:${(resendCooldown % 60).toString().padStart(2, '0')})`
-                      : t('profile.verify')}
+                <Group gap="xs">
+                  {userEmail && !emailVerified && (
+                    <Button
+                      variant="light"
+                      size="xs"
+                      color="orange"
+                      onClick={handleSendVerifyCode}
+                      loading={verifySending}
+                      disabled={resendCooldown > 0}
+                    >
+                      {resendCooldown > 0
+                        ? `${t('profile.verify')} (${Math.floor(resendCooldown / 60)}:${(resendCooldown % 60).toString().padStart(2, '0')})`
+                        : t('profile.verify')}
+                    </Button>
+                  )}
+                  <Button variant="light" size="xs" onClick={openEmailModal}>
+                    {userEmail ? t('profile.change') : t('profile.link')}
                   </Button>
-                )}
-                <Button variant="light" size="xs" onClick={openEmailModal}>
-                  {userEmail ? t('profile.change') : t('profile.link')}
-                </Button>
-              </Group>
+                </Group>
             </Group>
             <Group>
               <IconMail size={24} color={emailVerified ? '#22c55e' : '#666'} />
@@ -531,13 +550,19 @@ export default function Profile() {
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="md">
           <Text fw={500}>{t('profile.telegram')}</Text>
-          <Button variant="light" size="xs" onClick={openTelegramModal}>
-            {telegramUsername ? t('profile.change') : t('profile.link')}
-          </Button>
+          {telegramLoading ? (
+            <Skeleton width={100} height={32} />
+          ) : (
+            <Button variant="light" size="xs" onClick={openTelegramModal}>
+              {telegramUsername ? t('profile.change') : t('profile.link')}
+            </Button>
+          )}
         </Group>
         <Group>
           <IconBrandTelegram size={24} color="#0088cc" />
-          {telegramUsername ? (
+          {telegramLoading ? (
+            <Skeleton width={150} height={20} />
+          ) : telegramUsername ? (
             <div>
               <Text size="sm">@{telegramUsername}</Text>
               <Text size="xs" c="dimmed">{t('profile.telegramLinked')}</Text>
@@ -546,9 +571,13 @@ export default function Profile() {
             <Text size="sm" c="dimmed">{t('profile.telegramNotLinked')}</Text>
           )}
         </Group>
-          <Text size="xs" c="dimmed" mt="md">
-            {t('profile.telegramDescription')}
-          </Text>
+          {telegramLoading ? (
+            <Skeleton width="70%" mt={10} height={16} />
+          ) : (
+            <Text size="xs" c="dimmed" mt="md">
+              {t('profile.telegramDescription')}
+            </Text>
+          )}
       </Card>
 
       <SecuritySettings />
@@ -602,6 +631,8 @@ export default function Profile() {
           <TextInput
             label={t('profile.emailAddress')}
             placeholder="example@email.com"
+            withAsterisk
+            error={!isValidEmail(emailInput)}
             type="email"
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
@@ -614,7 +645,7 @@ export default function Profile() {
             <Button variant="light" onClick={() => setEmailModalOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleSaveEmail} loading={emailSaving}>
+            <Button onClick={handleSaveEmail} loading={emailSaving} disabled={!isValidEmail(emailInput)}>
               {t('common.save')}
             </Button>
           </Group>

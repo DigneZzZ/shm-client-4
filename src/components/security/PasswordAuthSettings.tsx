@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Text, Stack, Group, Button, Badge, Alert } from '@mantine/core';
+import { Card, Text, Stack, Group, Button, Badge, Alert, Loader, Center } from '@mantine/core';
 import { IconLock, IconLockOpen, IconAlertCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
@@ -8,9 +8,10 @@ import ConfirmModal from './../ConfirmModal';
 
 interface PasswordAuthSettingsProps {
   embedded?: boolean;
+  isActive?: boolean;
 }
 
-export default function PasswordAuthSettings({ embedded = false }: PasswordAuthSettingsProps) {
+export default function PasswordAuthSettings({ embedded = false, isActive = true }: PasswordAuthSettingsProps) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<PasswordAuthStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,8 +33,11 @@ export default function PasswordAuthSettings({ embedded = false }: PasswordAuthS
   };
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
     loadStatus();
-  }, []);
+  }, [isActive]);
 
   const handleDisable = async () => {
     setDisabling(true);
@@ -78,15 +82,24 @@ export default function PasswordAuthSettings({ embedded = false }: PasswordAuthS
     }
   };
 
-  if (loading || !status) {
-    return null;
+  if (loading) {
+    return (
+      <Center py="xl">
+        <Loader />
+      </Center>
+    );
   }
 
-  if (!status.passkey_enabled) {
-    return null;
+  if (!status) {
+    return (
+      <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light">
+        {t('common.error')}
+      </Alert>
+    );
   }
 
   const isDisabled = status.password_auth_disabled === 1;
+  const passkeyAllowed = !!status.passkey_enabled;
 
   const mainContent = (
     <Stack gap="xs">
@@ -115,6 +128,7 @@ export default function PasswordAuthSettings({ embedded = false }: PasswordAuthS
             leftSection={<IconLockOpen size={16} />}
             onClick={handleEnable}
             loading={enabling}
+            disabled={!passkeyAllowed}
           >
             {t('passwordAuth.enable')}
           </Button>
@@ -125,6 +139,7 @@ export default function PasswordAuthSettings({ embedded = false }: PasswordAuthS
           color="red"
           leftSection={<IconLock size={16} />}
           onClick={() => setConfirmDisableOpen(true)}
+          disabled={!passkeyAllowed}
         >
           {t('passwordAuth.disable')}
         </Button>

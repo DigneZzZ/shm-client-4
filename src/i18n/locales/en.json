@@ -117,6 +117,7 @@
     "emailVerifiedSuccess": "Email successfully verified",
     "emailVerifyError": "Failed to verify email",
     "emailMismatch": "Email does not match the one linked to your profile",
+    "isCurrentEmail": "Email matches the current one",
     "invalidCode": "Invalid verification code",
     "codeExpired": "Verification code expired. Please request a new one.",
     "emailDescription": "Email is used for password recovery and notifications",
@@ -181,7 +182,9 @@
     "serviceStopError": "Failed to stop service",
     "amountToPay": "Amount to pay",
     "payService": "Pay {{amount}} ₽",
-    "savings": "You save {{amount}} ₽ with discount"
+    "savings": "You save {{amount}} ₽ with discount",
+    "savings_bonus": "We will credit {{amount}} ₽ in bonuses",
+    "profit": "Your profit is {{amount}} ₽ considering discount and bonuses"
   },
   "categories": {
     "vpn": "VPN",

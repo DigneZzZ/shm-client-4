@@ -117,6 +117,7 @@
     "emailVerifiedSuccess": "Email успешно подтверждён",
     "emailVerifyError": "Не удалось подтвердить email",
     "emailMismatch": "Email не совпадает с привязанным к профилю",
+    "isCurrentEmail": "Email совпадает с текущим",
     "invalidCode": "Неверный код подтверждения",
     "codeExpired": "Код подтверждения истёк. Запросите новый.",
     "emailDescription": "Email используется для восстановления пароля и уведомлений",
@@ -181,7 +182,9 @@
     "serviceStopError": "Не удалось остановить услугу",
     "amountToPay": "К оплате",
     "payService": "Оплатить {{amount}} ₽",
-    "savings": "Вы экономите {{amount}} ₽ с учётом скидки"
+    "savings": "Вы экономите {{amount}} ₽ с учётом скидки",
+    "savings_bonus": "Спишем {{amount}} ₽ бонусами",
+    "profit": "Ваша выгода {{amount}} ₽ с учётом скидки и бонусов"
   },
   "categories": {
     "vpn": "VPN",

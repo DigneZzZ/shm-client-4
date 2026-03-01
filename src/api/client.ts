@@ -132,9 +132,14 @@ export const userApi = {
   getPaySystems: () => api.get('/user/pay/paysystems'),
   getForecast: () => api.get('/user/pay/forecast'),
   deleteAutopayment: (paySystem: string) => api.delete('/user/autopayment', { params: { pay_system: paySystem } }),
-  setEmail: (email: string) => api.put('/user/email/set', { email: email }),
+};
+
+export const userEmailApi = {
+  getEmail: () => api.get<{ data: { email: string, email_verified: number } }>('/user/email'),
+  setEmail: (email: string) => api.put('/user/email', { email: email }),
   sendVerifyCode: (email: string) => api.post('/user/email/verify', { email: email }),
   confirmEmail: (code: string) => api.post('/user/email/verify', { code: code }),
+  deleteEmail: () => api.delete('/user/email'),
 };
 
 export const storageApi = {
