@@ -701,11 +701,12 @@ export default function Services() {
   const [categoryPages, setCategoryPages] = useState<Record<string, number>>({});
   const perPage = 5;
   const { t } = useTranslation();
-  const { userEmailVerified } = useStore();
+  const { userEmailVerified, setOpenVerifyModal } = useStore();
   const [confirmEmailNotVerified, setConfirmEmailNotVerified] = useState(false);
   const navigate = useNavigate();
 
   const handleEmailNotVerified = async () => {
+    setOpenVerifyModal(true);
     navigate('/');
   };
 

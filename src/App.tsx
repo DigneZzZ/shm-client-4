@@ -1,8 +1,8 @@
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { MantineProvider, createTheme, AppShell, Group, Text, ActionIcon, useMantineColorScheme, useComputedColorScheme, Center, Loader, Box, Button, Modal, TextInput, Stack } from '@mantine/core';
-import { Notifications, notifications } from '@mantine/notifications';
+import { Notifications } from '@mantine/notifications';
 import { useMediaQuery } from '@mantine/hooks';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { IconSun, IconMoon, IconLogout, IconHeadset } from '@tabler/icons-react';
@@ -14,6 +14,7 @@ import { getCookie, removeCookie, parseAndSavePartnerId, parseAndSaveSessionId }
 import { config } from './config';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { hasTelegramWebAppAutoAuth, isTelegramWebApp } from './constants/webapp';
+import { useEmailRequired } from './hooks/useEmailRequired';
 
 parseAndSaveSessionId();
 parseAndSavePartnerId();
@@ -199,70 +200,28 @@ function BottomNavigation() {
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, userEmail, setUserEmail, isAuthenticated, isLoading, setUser, setIsLoading, logout } = useStore();
+  const { user, userEmail, isAuthenticated, isLoading, setUser, setIsLoading, setUserEmail, setUserEmailVerified, setIsEmailLoaded, logout } = useStore();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { t } = useTranslation();
-  const [globalEmailModalOpen, setGlobalEmailModalOpen] = useState(false);
-  const [globalEmailInput, setGlobalEmailInput] = useState('');
-  const [globalEmailSaving, setGlobalEmailSaving] = useState(false);
-
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  const handleGlobalSaveEmail = async () => {
-    const email = globalEmailInput.trim();
-    if (userEmail && email === userEmail) {
-      notifications.show({
-        title: t('common.error'),
-        message: t('profile.isCurrentEmail'),
-        color: 'red',
-      });
-      return;
-    }
-
-    setGlobalEmailSaving(true);
-    try {
-      const response = await userEmailApi.setEmail(email);
-      const data = response.data?.data;
-      if (Array.isArray(data) && data[0]?.msg && data[0].msg !== 'Successful') {
-        const errorMap: Record<string, string> = {
-          'is not email': t('profile.invalidEmail'),
-          'Email mismatch. Use the email shown in your profile.': t('profile.emailMismatch'),
-        };
-        notifications.show({
-          title: t('common.error'),
-          message: errorMap[data[0].msg] || data[0].msg,
-          color: 'red',
-        });
-        return;
-      }
-      setUserEmail(email);
-      notifications.show({
-        title: t('common.success'),
-        message: t('profile.emailSaved'),
-        color: 'green',
-      });
-      setGlobalEmailModalOpen(false);
-    } catch {
-      notifications.show({
-        title: t('common.error'),
-        message: t('profile.emailSaveError'),
-        color: 'red',
-      });
-    } finally {
-      setGlobalEmailSaving(false);
-    }
-  };
-
-  useEffect(() => {
-    if (config.EMAIL_REQUIRED === 'true' && user && !userEmail) {
-      setGlobalEmailInput('');
-      setGlobalEmailModalOpen(true);
-    } else {
-      setGlobalEmailModalOpen(false);
-    }
-  }, [user, userEmail]);
+  const {
+    modalOpen: globalEmailModalOpen,
+    setModalOpen: setGlobalEmailModalOpen,
+    emailInput: globalEmailInput,
+    setEmailInput: setGlobalEmailInput,
+    saving: globalEmailSaving,
+    handleSave: handleGlobalSaveEmail,
+    isValidEmail,
+    verifyModalOpen: globalVerifyModalOpen,
+    setVerifyModalOpen: setGlobalVerifyModalOpen,
+    verifyCode: globalVerifyCode,
+    setVerifyCode: setGlobalVerifyCode,
+    verifySending: globalVerifySending,
+    verifyConfirming: globalVerifyConfirming,
+    resendCooldown: globalResendCooldown,
+    pendingEmail: globalPendingEmail,
+    handleConfirmEmail: handleGlobalConfirmEmail,
+    handleResendCode: handleGlobalResendCode,
+  } = useEmailRequired();
 
   const handleSupportLink = () => {
     if (config.SUPPORT_LINK) {
@@ -319,6 +278,7 @@ function AppContent() {
       const token = getCookie();
 
       if (!token) {
+        setIsEmailLoaded(true);
         setIsLoading(false);
         return;
       }
@@ -335,8 +295,11 @@ function AppContent() {
           if (emailObj && emailObj.email) {
             setUserEmail(emailObj.email);
           }
+          setUserEmailVerified(emailObj?.email_verified || 0);
         } catch {
           setUserEmail(null);
+        } finally {
+          setIsEmailLoaded(true);
         }
       } catch {
         removeCookie();
@@ -377,7 +340,7 @@ function AppContent() {
           label={t('profile.emailAddress')}
           placeholder="example@email.com"
           withAsterisk
-          error={!isValidEmail(globalEmailInput)}
+          error={globalEmailInput.length > 0 && !isValidEmail(globalEmailInput)}
           type="email"
           value={globalEmailInput}
           onChange={(e) => setGlobalEmailInput(e.target.value)}
@@ -398,10 +361,56 @@ function AppContent() {
     </Modal>
   );
 
+  const verifyRequiredModal = (
+    <Modal
+      opened={globalVerifyModalOpen}
+      onClose={() => setGlobalVerifyModalOpen(false)}
+      title={t('profile.verifyEmail')}
+    >
+      <Stack gap="md">
+        <Text size="sm">
+          {t('profile.verifyEmailDescription', { email: globalPendingEmail })}
+        </Text>
+        <TextInput
+          label={t('profile.verifyCode')}
+          placeholder="123456"
+          value={globalVerifyCode}
+          onChange={(e) => setGlobalVerifyCode(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleGlobalConfirmEmail()}
+          maxLength={6}
+        />
+        <Group justify="space-between">
+          <Button
+            variant="subtle"
+            size="xs"
+            onClick={handleGlobalResendCode}
+            loading={globalVerifySending}
+            disabled={globalResendCooldown > 0}
+          >
+            {globalResendCooldown > 0 ? `${t('profile.resendCode')} (${globalResendCooldown}s)` : t('profile.resendCode')}
+          </Button>
+          <Group gap="xs">
+            <Button variant="light" onClick={() => setGlobalVerifyModalOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={handleGlobalConfirmEmail}
+              loading={globalVerifyConfirming}
+              disabled={!globalVerifyCode.trim()}
+            >
+              {t('profile.confirmEmail')}
+            </Button>
+          </Group>
+        </Group>
+      </Stack>
+    </Modal>
+  );
+
   if (isTelegramWebApp || isMobile) {
     return (
       <>
         {emailRequiredModal}
+        {verifyRequiredModal}
         <Box style={{ minHeight: '100vh', paddingBottom: 100 }}>
           <WebAppHeader />
           <Box px="md">
@@ -425,6 +434,7 @@ function AppContent() {
   return (
     <>
       {emailRequiredModal}
+      {verifyRequiredModal}
       <AppShell
         header={{ height: 60 }}
         padding="md"

@@ -47,7 +47,7 @@ interface ForecastData {
 }
 
 export default function Profile() {
-  const { telegramPhoto, setUserEmail, setUserEmailVerified } = useStore();
+  const { telegramPhoto, userEmail: storeEmail, userEmailVerified: storeEmailVerified, setUserEmail, setUserEmailVerified } = useStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -62,8 +62,16 @@ export default function Profile() {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [emailSaving, setEmailSaving] = useState(false);
-  const [profileEmail, setProfileEmail] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState(0);
+  const [profileEmail, setProfileEmail] = useState<string | null>(storeEmail);
+  const [emailVerified, setEmailVerified] = useState<number>(storeEmailVerified || 0);
+
+  useEffect(() => {
+    setProfileEmail(storeEmail);
+  }, [storeEmail]);
+
+  useEffect(() => {
+    setEmailVerified(storeEmailVerified || 0);
+  }, [storeEmailVerified]);
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
   const [verifyCode, setVerifyCode] = useState('');
   const [verifySending, setVerifySending] = useState(false);
@@ -134,20 +142,7 @@ export default function Profile() {
         }
       }
 
-      try {
-        const emailResponse = await userEmailApi.getEmail();
-        const responseData = emailResponse.data.data;
-        const data = Array.isArray(responseData) ? responseData[0] : responseData;
-        setProfileEmail(data.email || null);
-        if (setUserEmail) {
-          setUserEmail(data.email || null);
-          setUserEmailVerified(data.email_verified);
-        }
-        setEmailVerified(data.email_verified || 0 );
-        setUserEmailVerified(data.email_verified || 0);
-      } catch {
-      } finally {
-      }
+      // email уже загружен в стор при старте (App.tsx checkAuth)
     };
 
     loadExtras();
@@ -177,12 +172,6 @@ export default function Profile() {
     const profileData = profileResponse.data.data;
     const data = Array.isArray(profileData) ? profileData[0] : profileData;
     setProfile(data);
-    setProfileEmail(data.email || null);
-    if (setUserEmail) {
-      setUserEmail(data.email || null);
-    }
-    setEmailVerified(data.email_verified || 0 );
-    setUserEmailVerified(data.email_verified || 0 );
   };
 
   const openTelegramModal = () => {
