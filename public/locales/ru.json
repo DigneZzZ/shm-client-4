@@ -141,6 +141,8 @@
     "profileUpdateError": "Не удалось обновить профиль",
     "forecast": "Прогноз оплаты",
     "toPay": "К оплате",
+    "nextRenewal": "Следующая услуга",
+    "debt": "Текущий долг",
     "notPaid": "Не оплачено",
     "savedPaymentMethods": "Сохранённые способы оплаты",
     "method": "метод",

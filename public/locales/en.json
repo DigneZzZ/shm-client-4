@@ -141,6 +141,8 @@
     "profileUpdateError": "Failed to update profile",
     "forecast": "Payment forecast",
     "toPay": "To pay",
+    "nextRenewal": "Next service",
+    "debt": "Current debt",
     "notPaid": "Not paid",
     "savedPaymentMethods": "Saved payment methods",
     "method": "method",

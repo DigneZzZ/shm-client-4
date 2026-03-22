@@ -27,6 +27,17 @@ interface UserProfile {
   telegram_user_id?: number;
 }
 
+interface ForecastNextItem {
+  name: string;
+  cost: number;
+  total: number;
+  months: number;
+  qnt: number;
+  service_id: number;
+  bonus: number;
+  discount: number;
+}
+
 interface ForecastItem {
   name: string;
   cost: number;
@@ -37,11 +48,14 @@ interface ForecastItem {
   months: number;
   discount: number;
   qnt: number;
+  expire?: string;
+  next?: ForecastNextItem;
 }
 
 interface ForecastData {
   balance: number;
   bonuses: number;
+  dept: number;
   total: number;
   items: ForecastItem[];
 }
@@ -55,6 +69,7 @@ export default function Profile() {
   const [telegramUsername, setTelegramUsername] = useState<string | null>(null);
   const [telegramLoading, setTelegramLoading] = useState(false);
   const [payModalOpen, setPayModalOpen] = useState(false);
+  const [payModalAmount, setPayModalAmount] = useState<number | undefined>(undefined);
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [telegramModalOpen, setTelegramModalOpen] = useState(false);
   const [telegramInput, setTelegramInput] = useState('');
@@ -382,121 +397,69 @@ export default function Profile() {
     <Stack gap="lg">
       <Title order={2}>{t('profile.title')}</Title>
 
-      <Card withBorder radius="md" p="lg">
-        <Group>
-          <Avatar
-            size={80}
-            radius="xl"
-            color="blue"
-            src={telegramPhoto || undefined}
-          >
-            {!telegramPhoto && (profile.full_name?.charAt(0) || profile.login?.charAt(0)?.toUpperCase() || '?')}
-          </Avatar>
-          <div>
-            <Text fw={500} size="lg">{profile.full_name || profile.login || t('profile.user')}</Text>
-            <Text size="sm" c="dimmed">ID: {profile.user_id} - {profile.login || '-'}</Text>
-            { profile.discount && profile.discount > 0 ? ( <Text size="xm" style={{ color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }}>{t('profile.discount')}: {profile.discount}%</Text>) : undefined}
-          </div>
-        </Group>
-
-        <Divider my="md" />
-
-        <Group>
-          <div style={{ maxWidth: '80%' }}>
-            <Text size="sm"> {partnerLink}
-              <Tooltip label={clipboard.copied ? t('common.copied') : t('common.copy')}>
-                <ActionIcon color={clipboard.copied ? 'teal' : 'gray'} variant="subtle" onClick={() => clipboard.copy(`${window.location.origin}${window.location.pathname}?partner_id=${profile.user_id}`)}>
-                  {clipboard.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                </ActionIcon>
-              </Tooltip>
-            </Text>
-            <Text size="xs" c="dimmed">{t('profile.partnerLinkDescription')}</Text>
-          </div>
-        </Group>
-      </Card>
-
-      {forecast && forecast.items && forecast.items.length > 0 && (
-        <Card withBorder radius="md" p="lg">
-          <Group
-            justify="space-between"
-            style={{ cursor: 'pointer' }}
-            onClick={() => setForecastOpen(!forecastOpen)}
-          >
-            <div>
-              <Text fw={500}>{t('profile.forecast')}</Text>
-              <Text size="sm" c={forecast.total > 0 ? 'red' : 'green'} fw={600}>
-                {t('profile.toPay')}: {forecast.total.toFixed(2)} {t('common.currency')}
-              </Text>
-            </div>
-            {forecastOpen ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
-          </Group>
-          <Collapse in={forecastOpen}>
-            <Stack gap="sm" mt="md">
-              {forecast.items.map((item, index) => (
-                <Card
-                  key={index}
-                  withBorder
-                  radius="sm"
-                  p="sm"
-                  bg={item.status === 'NOT PAID'
-                    ? (colorScheme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'red.0')
-                    : undefined
-                  }
-                >
-                  <Group justify="space-between" wrap="nowrap">
-                    <div style={{ flex: 1 }}>
-                      <Text size="sm" fw={500}>{item.name}</Text>
-                      <Text size="xs" c="dimmed">
-                        {item.months} {t('common.months')} × {item.qnt} {t('common.pieces')}
-                      </Text>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <Text size="sm" fw={600} c={item.status === 'NOT PAID' ? 'red' : 'green'}>
-                        {item.total.toFixed(2)} {t('common.currency')}
-                      </Text>
-                      <Text size="xs" c={item.status === 'NOT PAID' ? 'red' : 'green'}>
-                        {t(`status.${item.status}`)}
-                      </Text>
-                    </div>
-                  </Group>
-                </Card>
-              ))}
-            </Stack>
-          </Collapse>
-        </Card>
-      )}
 
       <Grid>
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Card withBorder radius="md" p="lg">
+        <Grid.Col span={{ base: 12, md: 6 }} style={{ display: 'flex' }}>
+          <Card withBorder radius="md" p="lg" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Group>
+              <Avatar
+                size={80}
+                radius="xl"
+                color="blue"
+                src={telegramPhoto || undefined}
+              >
+                {!telegramPhoto && (profile.full_name?.charAt(0) || profile.login?.charAt(0)?.toUpperCase() || '?')}
+              </Avatar>
+              <div>
+                <Text fw={500} size="lg">{profile.full_name || profile.login || t('profile.user')}</Text>
+                <Text size="sm" c="dimmed">ID: {profile.user_id} - {profile.login || '-'}</Text>
+                { profile.discount && profile.discount > 0 ? ( <Text size="xm" style={{ color: colorScheme === 'dark' ? '#4ade80' : '#16a34a' }}>{t('profile.discount')}: {profile.discount}%</Text>) : undefined}
+              </div>
+            </Group>
+
+            <Divider my="md" />
+
+            <Group>
+              <div style={{ maxWidth: '80%' }}>
+                <Text size="sm"> {partnerLink}
+                  <Tooltip label={clipboard.copied ? t('common.copied') : t('common.copy')}>
+                    <ActionIcon color={clipboard.copied ? 'teal' : 'gray'} variant="subtle" onClick={() => clipboard.copy(`${window.location.origin}${window.location.pathname}?partner_id=${profile.user_id}`)}>
+                      {clipboard.copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                    </ActionIcon>
+                  </Tooltip>
+                </Text>
+                <Text size="xs" c="dimmed">{t('profile.partnerLinkDescription')}</Text>
+              </div>
+            </Group>
+
+            <Divider my="md" />
+
             <Group justify="space-between" align="center">
               <div>
                 <Group gap="xs" align="baseline">
-                  {t('profile.balance')}: <Text size="xl" fw={700}>{profile.balance?.toFixed(2) || '0.00'} {t('common.currency')}</Text>
+                  {t('profile.balance')}: <Text color="green" size="xl" fw={700}>{profile.balance?.toFixed(2) || '0.00'} {t('common.currency')}</Text>
                 </Group>
               </div>
-              <Button leftSection={<IconCreditCard size={18} />} onClick={() => setPayModalOpen(true)}>
+              <Button leftSection={<IconCreditCard size={18} />} color="green" onClick={() => { setPayModalAmount(forecast?.total ?? undefined); setPayModalOpen(true); }}>
                 {t('profile.topUp')}
               </Button>
             </Group>
-          </Card>
-        </Grid.Col>
 
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Card withBorder radius="md" p="lg">
+            <Divider my="md" />
+
             <Group justify="space-between" align="center">
               <div>
                   <Text size="xm" c="dimmed">{t('profile.bonus')}: {profile.bonus}</Text>
               </div>
-              <Button onClick={() => setPromoModalOpen(true)}>
+              <Button onClick={() => setPromoModalOpen(true)} color="green">
                 {t('profile.enterPromo')}
               </Button>
             </Group>
-          </Card>
-        </Grid.Col>
-      </Grid>
 
-      <Grid>
+          </Card>
+
+        </Grid.Col>
+
         <Grid.Col span={{ base: 12, md: 6 }} style={{ display: 'flex' }}>
           <Card withBorder radius="md" p="lg" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Group justify="space-between" mb="md">
@@ -533,10 +496,8 @@ export default function Profile() {
                 disabled={!editing}
               />
             </Stack>
-          </Card>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 6 }} style={{ display: 'flex' }}>
-          <Card withBorder radius="md" p="lg" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Divider my="md" />
+
             <Group justify="space-between" mb="md">
               <Text fw={500}>Email</Text>
                 <Group gap="xs">
@@ -579,6 +540,90 @@ export default function Profile() {
         </Grid.Col>
       </Grid>
 
+      {forecast && forecast.items && forecast.items.length > 0 && (
+        <Card withBorder radius="md" p="lg">
+          <Group
+            justify="space-between"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setForecastOpen(!forecastOpen)}
+          >
+            <div>
+              <Text fw={500}>{t('profile.forecast')}</Text>
+              <Text size="sm" c={forecast.total > 0 ? 'red' : 'green'} fw={600}>
+                {t('profile.toPay')}: {forecast.total.toFixed(2)} {t('common.currency')}
+              </Text>
+            </div>
+            {forecastOpen ? <IconChevronUp size={20} /> : <IconChevronDown size={20} />}
+          </Group>
+          <Collapse in={forecastOpen}>
+            <Stack gap="sm" mt="md">
+              {forecast.items.map((item, index) => (
+                <Card
+                  key={index}
+                  withBorder
+                  radius="sm"
+                  p="sm"
+                  bg={item.status === 'NOT PAID'
+                    ? (colorScheme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'red.0')
+                    : undefined
+                  }
+                >
+                  <Stack gap={4}>
+                    <Group justify="space-between" wrap="nowrap">
+                      <div style={{ flex: 1 }}>
+                        <Text size="sm" fw={500}>{item.name}</Text>
+                        { item.qnt > 1 && (
+                          <Text size="xs" c="dimmed">
+                            {item.months} {t('common.months')} × {item.qnt} {t('common.pieces')}
+                          </Text>
+                        )}
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <Text size="sm" c="dimmed">
+                          {item.total.toFixed(2)} {t('common.currency')}
+                        </Text>
+                        <Text size="xs" c={item.status === 'NOT PAID' ? 'red' : 'green'}>
+                          {t(`status.${item.status}`)}
+                        </Text>
+                      </div>
+                    </Group>
+                    {item.next && (
+                      <Group justify="space-between" wrap="nowrap" pt={4} style={{ borderTop: '1px dashed var(--mantine-color-default-border)' }}>
+                        <div style={{ flex: 1 }}>
+                          <Text size="xs" c="dimmed">{t('profile.nextRenewal')}:</Text>
+                          <Text size="sm" fw={500}>{item.next.name}</Text>
+                          { item.next.qnt > 1 && (
+                            <Text size="xs" c="dimmed">
+                              {item.next.months} {t('common.months')} × {item.next.qnt} {t('common.pieces')}
+                            </Text>
+                          )}
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <Text size="sm" fw={700} c="red">
+                            {item.next.total.toFixed(2)} {t('common.currency')}
+                          </Text>
+                        </div>
+                      </Group>
+                    )}
+                  </Stack>
+                </Card>
+              ))}
+              {forecast.dept > 0 && (
+                <Card withBorder radius="sm" p="sm" bg={colorScheme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'red.0'}>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text size="sm" fw={500} c="red">{t('profile.debt')}</Text>
+                    <Text size="sm" fw={700} c="red">{forecast.dept.toFixed(2)} {t('common.currency')}</Text>
+                  </Group>
+                </Card>
+              )}
+              <Button leftSection={<IconCreditCard size={18} />} onClick={() => { setPayModalAmount(forecast?.total ?? undefined); setPayModalOpen(true); }}>
+                {t('profile.toPay')} {forecast.total.toFixed(2)} {t('common.currency')}
+              </Button>
+            </Stack>
+          </Collapse>
+        </Card>
+      )}
+
     { config.ALLOW_TELEGRAM_PIN === 'true' && (
       <>
       <Card withBorder radius="md" p="lg">
@@ -618,7 +663,7 @@ export default function Profile() {
 
       <SecuritySettings />
 
-      <PayModal opened={payModalOpen} onClose={() => setPayModalOpen(false)} />
+      <PayModal opened={payModalOpen} onClose={() => setPayModalOpen(false)} initialAmount={payModalAmount} />
 
       <PromoModal
         opened={promoModalOpen}

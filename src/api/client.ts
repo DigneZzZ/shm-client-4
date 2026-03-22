@@ -133,10 +133,17 @@ export const userApi = {
     finish_active: finish_active,
     allow_partial_period: partial_renew,
   }),
-  getPayments: () => api.get('/user/pay'),
+  getPayments: (params?: { limit?: number; offset?: number; sort_field?: string; sort_direction?: string; filter?: Record<string, unknown> }) => {
+    const { filter, ...rest } = params || {};
+    return api.get('/user/pay', { params: { ...rest, ...(filter ? { filter: JSON.stringify(filter) } : {}) } });
+  },
   getPaySystems: () => api.get('/user/pay/paysystems'),
   getForecast: () => api.get('/user/pay/forecast'),
   deleteAutopayment: (paySystem: string) => api.delete('/user/autopayment', { params: { pay_system: paySystem } }),
+  getWithdrawals: (params?: { limit?: number; offset?: number; sort_field?: string; sort_direction?: string; filter?: Record<string, unknown> }) => {
+    const { filter, ...rest } = params || {};
+    return api.get('/user/withdraw', { params: { ...rest, ...(filter ? { filter: JSON.stringify(filter) } : {}) } });
+  },
 };
 
 export const userEmailApi = {

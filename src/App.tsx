@@ -1,6 +1,6 @@
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MantineProvider, createTheme, AppShell, Group, Text, ActionIcon, useMantineColorScheme, useComputedColorScheme, Center, Loader, Box, Button, Modal, TextInput, Stack } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useMediaQuery } from '@mantine/hooks';
@@ -15,13 +15,13 @@ import { config } from './config';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { hasTelegramWebAppAutoAuth, isTelegramWebApp } from './constants/webapp';
 import { useEmailRequired } from './hooks/useEmailRequired';
+import PayHistoryModal from './components/PayHistoryModal';
+import WithdrawHistoryModal from './components/WithdrawHistoryModal';
 
 parseAndSaveSessionId();
 parseAndSavePartnerId();
 
 import Services from './pages/Services';
-import Payments from './pages/Payments';
-import Withdrawals from './pages/Withdrawals';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -129,11 +129,17 @@ function WebAppHeader() {
   );
 }
 
-function BottomNavigation() {
+function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => void; onWithdrawals: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
   const computedColorScheme = useComputedColorScheme('light');
   const { t } = useTranslation();
+
+  const handleClick = (path: string) => {
+    if (path === '/payments') { onPayments(); }
+    else if (path === '/withdrawals') { onWithdrawals(); }
+    else { navigate(path); }
+  };
 
   return (
     <Box
@@ -170,7 +176,7 @@ function BottomNavigation() {
             return (
               <Box
                 key={item.path}
-                onClick={() => navigate(item.path)}
+                onClick={() => handleClick(item.path)}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -222,6 +228,9 @@ function AppContent() {
     handleConfirmEmail: handleGlobalConfirmEmail,
     handleResendCode: handleGlobalResendCode,
   } = useEmailRequired();
+
+  const [payHistoryOpen, setPayHistoryOpen] = useState(false);
+  const [withdrawHistoryOpen, setWithdrawHistoryOpen] = useState(false);
 
   const handleSupportLink = () => {
     if (config.SUPPORT_LINK) {
@@ -415,15 +424,15 @@ function AppContent() {
           <WebAppHeader />
           <Box px="md">
             <Routes>
-              <Route path="/payments" element={<Payments />} />
-              <Route path="/withdrawals" element={<Withdrawals />} />
               <Route path="/" element={<Services />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Box>
-          <BottomNavigation />
+          <BottomNavigation onPayments={() => setPayHistoryOpen(true)} onWithdrawals={() => setWithdrawHistoryOpen(true)} />
         </Box>
+        <PayHistoryModal opened={payHistoryOpen} onClose={() => setPayHistoryOpen(false)} />
+        <WithdrawHistoryModal opened={withdrawHistoryOpen} onClose={() => setWithdrawHistoryOpen(false)} />
       </>
     );
   }
@@ -468,6 +477,20 @@ function AppContent() {
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
+                if (item.path === '/payments') {
+                  return (
+                    <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" onClick={() => setPayHistoryOpen(true)}>
+                      {t(item.labelKey)}
+                    </Button>
+                  );
+                }
+                if (item.path === '/withdrawals') {
+                  return (
+                    <Button key={item.path} leftSection={<Icon size={16} />} variant="subtle" size="xs" radius="md" onClick={() => setWithdrawHistoryOpen(true)}>
+                      {t(item.labelKey)}
+                    </Button>
+                  );
+                }
                 return (
                   <Button
                     key={item.path}
@@ -511,14 +534,14 @@ function AppContent() {
 
         <AppShell.Main>
           <Routes>
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/withdrawals" element={<Withdrawals />} />
             <Route path="/" element={<Services />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppShell.Main>
       </AppShell>
+      <PayHistoryModal opened={payHistoryOpen} onClose={() => setPayHistoryOpen(false)} />
+      <WithdrawHistoryModal opened={withdrawHistoryOpen} onClose={() => setWithdrawHistoryOpen(false)} />
     </>
   );
 }

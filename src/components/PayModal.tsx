@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Stack, Group, Button, Text, NumberInput, Select, Loader, ActionIcon, Badge, Card } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
@@ -19,19 +19,26 @@ interface PaySystem {
 interface PayModalProps {
   opened: boolean;
   onClose: () => void;
+  initialAmount?: number;
 }
 
-export default function PayModal({ opened, onClose }: PayModalProps) {
+export default function PayModal({ opened, onClose, initialAmount }: PayModalProps) {
   const { t } = useTranslation();
   const [paySystems, setPaySystems] = useState<PaySystem[]>([]);
   const [selectedPaySystem, setSelectedPaySystem] = useState<string | null>(null);
-  const [payAmount, setPayAmount] = useState<number | string>(100);
+  const [payAmount, setPayAmount] = useState<number | string>(initialAmount ?? 100);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [autopaymentToDelete, setAutopaymentToDelete] = useState<{ paysystem: string; name: string } | null>(null);
   const [processing, setProcessing] = useState(false);
+
+  useEffect(() => {
+    if (opened && initialAmount !== undefined) {
+      setPayAmount(initialAmount);
+    }
+  }, [opened, initialAmount]);
 
   const loadPaySystems = async () => {
     if (loaded) return;
