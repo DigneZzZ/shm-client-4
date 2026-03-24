@@ -14,7 +14,10 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   exit 1
 fi
 
-npm version "$VERSION" -m "chore: bump version to %s"
+npm version "$VERSION" --no-git-tag-version
+git add package.json package-lock.json
+git commit -m "chore: bump version to $VERSION"
+git tag "$VERSION"
 git push --follow-tags
 
 echo "Released $VERSION"

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getCookie, setCookie, removeCookie, extendCookie, getPartnerCookie, removePartnerCookie } from './cookie';
+import { config } from '../config';
 
 export const api = axios.create({
   baseURL: '/shm/v1',
@@ -74,6 +75,7 @@ export const auth = {
     const response = await api.post('/telegram/web/auth', {
       ...userData,
       register_if_not_exists: 1,
+      ...(config.TELEGRAM_WEBAPP_PROFILE && { profile: config.TELEGRAM_WEBAPP_PROFILE }),
       ...(partnerId && { partner_id: partnerId }),
     });
     const sessionId = response.data?.session_id || response.data?.id;
