@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Card, Text, Stack, Button, TextInput, PasswordInput, Divider, Title, Center, Modal, Group, Loader } from '@mantine/core';
+import { Card, Text, Stack, Button, ActionIcon, TextInput, PasswordInput, Divider, Title, Center, Modal, Group, Loader, useMantineColorScheme, useComputedColorScheme } from '@mantine/core';
 import { useForm, isEmail, hasLength } from '@mantine/form';
-import { IconLogin, IconUserPlus, IconFingerprint, IconShieldLock, IconBrandTelegram, IconMailForward, IconLock } from '@tabler/icons-react';
+import { IconLogin, IconUserPlus, IconHeadset, IconFingerprint, IconShieldLock, IconBrandTelegram, IconMailForward, IconLock, IconMoon, IconSun} from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { auth, passkeyApi, userApi } from '../api/client';
@@ -31,6 +31,22 @@ function arrayBufferToBase64Url(buffer: ArrayBuffer): string {
     binary += String.fromCharCode(bytes[i]);
   }
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function ThemeToggle() {
+  const { setColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme('light');
+
+  return (
+    <ActionIcon
+      onClick={() => setColorScheme(computedColorScheme === 'light' ? 'dark' : 'light')}
+      variant="default"
+      size="lg"
+      aria-label="Toggle color scheme"
+    >
+      {computedColorScheme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
+    </ActionIcon>
+  );
 }
 
 export default function Login() {
@@ -427,20 +443,38 @@ export default function Login() {
     }
   };
 
+  const handleSupportLink = () => {
+    if (config.SUPPORT_LINK) {
+      window.open(config.SUPPORT_LINK, '_blank');
+    }
+  };
+
   return (
     <Center h="80vh" style={{ position: 'relative' }}>
       <Card withBorder radius="md" p="xl" w={400}>
         <Stack gap="lg">
           <Group justify="space-between" align="center">
-            <div style={{ flex: 1 }} />
-            <Title order={2} ta="center" style={{ flex: 'auto' }}>{config.APP_NAME}</Title>
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
+              <ThemeToggle />
+            </div>
+            <Group gap="xs" align="center" style={{ flex: 'auto', justifyContent: 'center' }}>
+              {config.LOGO_URL && (
+                <img
+                  src={config.LOGO_URL}
+                  alt=""
+                  style={{ height: 28, width: 28, objectFit: 'contain', flexShrink: 0 }}
+                />
+              )}
+              <Title order={2} ta="center">{config.APP_NAME}</Title>
+            </Group>
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
               <LanguageSwitcher />
             </div>
-            { config.APP_DESCRIPTION && (
-              <Text size="sm" c="dimmed" ta="center" style={{ flex: 'auto' }}>{config.APP_DESCRIPTION}</Text>
-            )}
+
           </Group>
+          {config.APP_DESCRIPTION && (
+            <Text size="sm" c="dimmed" ta="center" style={{ flex: 'auto' }}>{config.APP_DESCRIPTION}</Text>
+          )}
           <Text size="sm" c="dimmed" ta="center">
               {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
           </Text>
@@ -744,6 +778,22 @@ export default function Login() {
         </Modal>
       )}
 
+      {config.SUPPORT_LINK && (
+        <Button
+          onClick={handleSupportLink}
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            zIndex: 200,
+          }}
+          leftSection={<IconHeadset size={20} />}
+          radius="xl"
+          size="md"
+        >
+          {t('common.support')}
+        </Button>
+      )}
     </Center>
   );
 }
