@@ -5,11 +5,12 @@ import { userEmailApi } from '../api/client';
 import { config } from '../config';
 import { useStore } from '../store/useStore';
 
+
 const RESEND_STORAGE_KEY = 'email_verify_last_sent';
 const RESEND_COOLDOWN_MS = 3 * 60 * 1000;
 
 export function useEmailRequired() {
-  const { user, userEmail, isEmailLoaded, setUserEmail, setUserEmailVerified, openVerifyModal, setOpenVerifyModal } = useStore();
+  const { user, userEmail, isEmailLoaded, setUserEmail, setUserEmailVerified, setIsEmailLoaded, openVerifyModal, setOpenVerifyModal } = useStore();
   const { t } = useTranslation();
   const [modalOpen, setModalOpen] = useState(false);
   const [emailInput, setEmailInput] = useState('');
@@ -22,15 +23,26 @@ export function useEmailRequired() {
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isEmailLoaded) return;
-
-    if (config.EMAIL_REQUIRED === 'true' && user && !userEmail) {
-      setEmailInput('');
-      setModalOpen(true);
-    } else {
-      setModalOpen(false);
-    }
-  }, [isEmailLoaded, user, userEmail]);
+    if (!user || isEmailLoaded) return;
+    userEmailApi.getEmail()
+      .then((resp) => {
+        const emailData = resp.data.data;
+        const emailObj = Array.isArray(emailData) ? emailData[0] : emailData;
+        const email = emailObj?.email || null;
+        setUserEmail(email);
+        setUserEmailVerified(emailObj?.email_verified ?? 0);
+        if (config.EMAIL_REQUIRED === 'true' && !email) {
+          setEmailInput('');
+          setModalOpen(true);
+        }
+      })
+      .catch(() => {
+        setUserEmail(null);
+      })
+      .finally(() => {
+        setIsEmailLoaded(true);
+      });
+  }, [user, isEmailLoaded]);
 
   useEffect(() => {
     if (!verifyModalOpen) return;

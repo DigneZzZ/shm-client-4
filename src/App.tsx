@@ -9,7 +9,7 @@ import { IconSun, IconMoon, IconLogout, IconHeadset } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next';
 import { useStore } from './store/useStore';
 import { NAV_ITEMS } from './constants/navigation';
-import { auth, userEmailApi } from './api/client';
+import { auth } from './api/client';
 import { getCookie, removeCookie, parseAndSavePartnerId, parseAndSaveSessionId } from './api/cookie';
 import { config } from './config';
 import LanguageSwitcher from './components/LanguageSwitcher';
@@ -207,7 +207,7 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
 function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, userEmail, isAuthenticated, isLoading, setUser, setIsLoading, setUserEmail, setUserEmailVerified, setIsEmailLoaded, logout } = useStore();
+  const { user, userEmail, isAuthenticated, isLoading, setUser, setIsLoading, logout } = useStore();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { t } = useTranslation();
   const {
@@ -291,7 +291,6 @@ function AppContent() {
       const token = getCookie();
 
       if (!token) {
-        setIsEmailLoaded(true);
         setIsLoading(false);
         return;
       }
@@ -301,19 +300,6 @@ function AppContent() {
         const responseData = response.data.data;
         const userData: any = Array.isArray(responseData) ? responseData[0] : responseData;
         setUser(userData);
-        try {
-          const emailResp = await userEmailApi.getEmail();
-          const emailData = emailResp.data.data;
-          const emailObj = Array.isArray(emailData) ? emailData[0] : emailData;
-          if (emailObj && emailObj.email) {
-            setUserEmail(emailObj.email);
-          }
-          setUserEmailVerified(emailObj?.email_verified || 0);
-        } catch {
-          setUserEmail(null);
-        } finally {
-          setIsEmailLoaded(true);
-        }
       } catch {
         removeCookie();
       } finally {
