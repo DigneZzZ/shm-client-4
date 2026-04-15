@@ -12,6 +12,9 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,11 +27,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image name
+        id: image
+        run: |
+          REPO_LC=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "name=ghcr.io/${REPO_LC}" >> $GITHUB_OUTPUT
 
       - name: Get version info
         id: version
@@ -80,7 +90,7 @@ jobs:
           target: client
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/shm-client-2:${{ steps.version.outputs.minor }}
-            ${{ steps.version.outputs.push_latest == 'true' && format('{0}/shm-client-2:latest', secrets.DOCKERHUB_USERNAME) || format('{0}/shm-client-2:skip-latest-{1}', secrets.DOCKERHUB_USERNAME, steps.version.outputs.rev) }}
+            ${{ steps.image.outputs.name }}-client-2:${{ steps.version.outputs.minor }}
+            ${{ steps.version.outputs.push_latest == 'true' && format('{0}-client-2:latest', steps.image.outputs.name) || format('{0}-client-2:skip-latest-{1}', steps.image.outputs.name, steps.version.outputs.rev) }}
           cache-from: type=gha,scope=client-2
           cache-to: type=gha,mode=max,scope=client-2
