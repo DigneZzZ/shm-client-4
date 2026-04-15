@@ -287,7 +287,8 @@
     "orderPaySuccess": "Service \"{{name}}\" ordered. Open payment window.",
     "orderError": "Failed to order service",
     "monoServiceBanner": "You already have an active subscription. Ordering additional services in this category is unavailable — use \"Change tariff\".",
-    "blockedByMono": "Unavailable while a subscription is active"
+    "blockedByMono": "Unavailable while a subscription is active",
+    "bonusCoversNow": "Now −{{amount}} ₽ from bonus"
   },
   "confirm": {
     "title": "Confirmation"

@@ -601,9 +601,17 @@ export default function OrderServiceModal({
                             )}
                           </div>
                           {(() => {
-                            const hasDiscount = !!(service.discount && service.discount > 0);
+                            const discount = Number(service.cost_discount || 0);
+                            const hasDiscount = discount > 0;
                             const bonusApplied = getAppliedBonus(service);
                             const hasBonus = bonusApplied > 0;
+                            const priceAfterDiscount = Math.max(0, Number(service.cost || 0) - discount);
+                            const periodLabel =
+                              service.period === 1 ? t('common.month') :
+                              service.period === 3 ? t('common.months3') :
+                              service.period === 6 ? t('common.months6') :
+                              service.period === 12 ? t('common.year') :
+                              formatPeriod(service.period, t);
                             return (
                               <Stack gap={2} align="flex-end">
                                 <Group gap="sm" align="baseline" wrap="nowrap">
@@ -613,22 +621,15 @@ export default function OrderServiceModal({
                                     </Text>
                                   )}
                                   <Text fw={600} c={hasDiscount ? 'teal' : undefined}>
-                                    {getEffectiveCost(service)} ₽
+                                    {priceAfterDiscount} ₽
                                   </Text>
-                                  <Text size="xs" c="dimmed">
-                                    / {service.period === 1 ? t('common.month') :
-                                       service.period === 3 ? t('common.months3') :
-                                       service.period === 6 ? t('common.months6') :
-                                       service.period === 12 ? t('common.year') :
-                                       formatPeriod(service.period, t)
-                                      }
-                                  </Text>
+                                  <Text size="xs" c="dimmed">/ {periodLabel}</Text>
                                 </Group>
                                 {hasBonus && (
                                   <Group gap={4} wrap="nowrap">
                                     <IconGift size={12} color="var(--mantine-color-teal-4)" />
                                     <Text size="xs" c="teal.4" fw={500}>
-                                      −{bonusApplied} ₽ {t('profile.bonus', 'бонусами').toLowerCase()}
+                                      {t('order.bonusCoversNow', 'Сейчас −{{amount}} ₽ с бонусов', { amount: bonusApplied })}
                                     </Text>
                                   </Group>
                                 )}
