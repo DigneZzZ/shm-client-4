@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Stack, Text, Card, Group, Badge, Loader, Center, Button, Paper, Divider, Select, NumberInput, Alert, Checkbox, ScrollArea, Tooltip } from '@mantine/core';
+import { Modal, Stack, Text, Card, Group, Badge, Loader, Center, Button, Paper, Divider, Select, NumberInput, Alert, Checkbox, ScrollArea, Tooltip, Accordion } from '@mantine/core';
 import { IconArrowLeft, IconCreditCard, IconCheck, IconWallet, IconInfoCircle, IconGift } from '@tabler/icons-react';
 import { servicesApi, userApi } from '../api/client';
 import { notifications } from '@mantine/notifications';
@@ -566,84 +566,152 @@ export default function OrderServiceModal({
         </Center>
       ) : (
         <Stack gap="md">
-          {Object.entries(groupedServices).map(([category, group ]) => (
-            <div key={category}>
-              <Text fw={500} size="sm" c="dimmed" mb="xs">
-                { group.title }
-              </Text>
-              <Stack gap="xs">
-                {group.services.map((service) => {
-                  const blocked = isServiceBlockedByMono(service.category);
-                  return (
-                    <Tooltip
-                      key={service.service_id}
-                      label={t('order.blockedByMono')}
-                      disabled={!blocked}
-                      withArrow
-                    >
-                      <Card
-                        withBorder
-                        radius="md"
-                        p="sm"
-                        onClick={blocked ? undefined : () => setSelectedService(service)}
-                        style={{
-                          cursor: blocked ? 'not-allowed' : 'pointer',
-                          opacity: blocked ? 0.5 : 1,
-                        }}
+          {Object.entries(groupedServices).map(([category, group]) => {
+            const formatPeriodLabel = (period: number): string =>
+              period === 1 ? t('common.month') :
+              period === 3 ? t('common.months3') :
+              period === 6 ? t('common.months6') :
+              period === 12 ? t('common.year') :
+              formatPeriod(period, t);
+
+            // Group services within the category by `period`
+            const byPeriod = group.services.reduce((acc, svc) => {
+              const key = String(svc.period);
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(svc);
+              return acc;
+            }, {} as Record<string, OrderService[]>);
+
+            const periodKeys = Object.keys(byPeriod)
+              .map(Number)
+              .sort((a, b) => a - b)
+              .map(String);
+
+            const effectiveCostOf = (svc: OrderService): number =>
+              Math.max(0, Number(svc.cost || 0) - Number(svc.cost_discount || 0));
+
+            const renderServiceCard = (service: OrderService) => {
+              const blocked = isServiceBlockedByMono(service.category);
+              const discount = Number(service.cost_discount || 0);
+              const hasDiscount = discount > 0;
+              const bonusApplied = getAppliedBonus(service);
+              const hasBonus = bonusApplied > 0;
+              const priceAfterDiscount = Math.max(0, Number(service.cost || 0) - discount);
+              const periodLabel = formatPeriodLabel(service.period);
+
+              return (
+                <Tooltip
+                  key={service.service_id}
+                  label={t('order.blockedByMono')}
+                  disabled={!blocked}
+                  withArrow
+                >
+                  <Card
+                    withBorder
+                    radius="md"
+                    p="sm"
+                    onClick={blocked ? undefined : () => setSelectedService(service)}
+                    style={{
+                      cursor: blocked ? 'not-allowed' : 'pointer',
+                      opacity: blocked ? 0.5 : 1,
+                      position: 'relative',
+                    }}
+                  >
+                    {hasDiscount && (
+                      <Badge
+                        color="red"
+                        variant="filled"
+                        size="xs"
+                        style={{ position: 'absolute', top: 8, right: 8 }}
                       >
-                        <Group justify="space-between">
-                          <div>
-                            <Text fw={500}>{service.name}</Text>
-                            {service.descr && (
-                              <Text size="xs" c="dimmed" lineClamp={1}>
-                                {service.descr}
-                              </Text>
-                            )}
-                          </div>
-                          {(() => {
-                            const discount = Number(service.cost_discount || 0);
-                            const hasDiscount = discount > 0;
-                            const bonusApplied = getAppliedBonus(service);
-                            const hasBonus = bonusApplied > 0;
-                            const priceAfterDiscount = Math.max(0, Number(service.cost || 0) - discount);
-                            const periodLabel =
-                              service.period === 1 ? t('common.month') :
-                              service.period === 3 ? t('common.months3') :
-                              service.period === 6 ? t('common.months6') :
-                              service.period === 12 ? t('common.year') :
-                              formatPeriod(service.period, t);
-                            return (
-                              <Stack gap={2}>
-                                <Group gap="sm" align="baseline" wrap="nowrap">
-                                  {hasDiscount && (
-                                    <Text size="sm" c="dimmed" style={{ textDecoration: 'line-through' }}>
-                                      {service.cost} ₽
-                                    </Text>
-                                  )}
-                                  <Text fw={600} c={hasDiscount ? 'teal' : undefined}>
-                                    {priceAfterDiscount} ₽
-                                  </Text>
-                                  <Text size="xs" c="dimmed">/ {periodLabel}</Text>
-                                </Group>
-                                {hasBonus && (
-                                  <Group gap={4} wrap="nowrap">
-                                    <IconGift size={12} color="var(--mantine-color-teal-4)" />
-                                    <Text size="xs" c="teal.4" fw={500}>
-                                      {t('order.bonusCoversNow', 'Сейчас −{{amount}} ₽ с бонусов', { amount: bonusApplied })}
-                                    </Text>
-                                  </Group>
-                                )}
-                              </Stack>
-                            );
-                          })()}
+                        {t('order.discountBadge', '−{{amount}} ₽', { amount: discount })}
+                      </Badge>
+                    )}
+                    <Group justify="space-between" wrap="nowrap" align="flex-start">
+                      <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                        <Text fw={600}>{service.name}</Text>
+                        {service.descr && (
+                          <Text size="xs" c="dimmed" lineClamp={2} style={{ lineHeight: 1.3 }}>
+                            {service.descr}
+                          </Text>
+                        )}
+                      </Stack>
+                      <Stack gap={2} style={{ flexShrink: 0 }}>
+                        <Group gap="sm" align="baseline" wrap="nowrap">
+                          {hasDiscount && (
+                            <Text size="sm" c="dimmed" style={{ textDecoration: 'line-through' }}>
+                              {service.cost} ₽
+                            </Text>
+                          )}
+                          <Text fw={700} c={hasDiscount ? 'teal' : undefined}>
+                            {priceAfterDiscount} ₽
+                          </Text>
+                          <Text size="xs" c="dimmed">/ {periodLabel}</Text>
                         </Group>
-                      </Card>
-                    </Tooltip>
-                  );
-                })}
-              </Stack>
-            </div>
-          ))}
+                        {hasBonus && (
+                          <Group gap={4} wrap="nowrap">
+                            <IconGift size={12} color="var(--mantine-color-teal-4)" />
+                            <Text size="xs" c="teal.4" fw={500}>
+                              {t('order.bonusCoversNow', 'Сейчас −{{amount}} ₽ с бонусов', { amount: bonusApplied })}
+                            </Text>
+                          </Group>
+                        )}
+                      </Stack>
+                    </Group>
+                  </Card>
+                </Tooltip>
+              );
+            };
+
+            // Inline rendering when there is a single period or a single service — no accordion needed.
+            const inlineRender = periodKeys.length <= 1 || group.services.length === 1;
+
+            return (
+              <div key={category}>
+                <Text fw={500} size="sm" c="dimmed" mb="xs">
+                  {group.title}
+                </Text>
+                {inlineRender ? (
+                  <Stack gap="xs">
+                    {group.services.map(renderServiceCard)}
+                  </Stack>
+                ) : (
+                  <Accordion variant="separated" radius="md" multiple>
+                    {periodKeys.map((pk) => {
+                      const period = Number(pk);
+                      const list = byPeriod[pk];
+                      const minPrice = Math.min(...list.map(effectiveCostOf));
+                      const anyDiscount = list.some((s) => Number(s.cost_discount || 0) > 0);
+                      return (
+                        <Accordion.Item key={pk} value={pk}>
+                          <Accordion.Control>
+                            <Group justify="space-between" wrap="nowrap" pr="sm">
+                              <Group gap="xs">
+                                <Text fw={600}>{formatPeriodLabel(period)}</Text>
+                                {anyDiscount && (
+                                  <Badge color="red" variant="light" size="xs">
+                                    {t('order.discountLabel', 'Скидка')}
+                                  </Badge>
+                                )}
+                              </Group>
+                              <Text size="sm" c="dimmed">
+                                {t('order.startingFrom', 'от')} {minPrice} ₽
+                              </Text>
+                            </Group>
+                          </Accordion.Control>
+                          <Accordion.Panel>
+                            <Stack gap="xs">
+                              {list.map(renderServiceCard)}
+                            </Stack>
+                          </Accordion.Panel>
+                        </Accordion.Item>
+                      );
+                    })}
+                  </Accordion>
+                )}
+              </div>
+            );
+          })}
         </Stack>
       )}
     </Modal>

@@ -288,7 +288,10 @@
     "orderError": "Failed to order service",
     "monoServiceBanner": "You already have an active subscription. Ordering additional services in this category is unavailable — use \"Change tariff\".",
     "blockedByMono": "Unavailable while a subscription is active",
-    "bonusCoversNow": "Now −{{amount}} ₽ from bonus"
+    "bonusCoversNow": "Now −{{amount}} ₽ from bonus",
+    "discountBadge": "−{{amount}} ₽",
+    "discountLabel": "Discount",
+    "startingFrom": "from"
   },
   "confirm": {
     "title": "Confirmation"

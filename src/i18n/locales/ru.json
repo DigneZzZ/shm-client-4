@@ -288,7 +288,10 @@
     "orderError": "Не удалось заказать услугу",
     "monoServiceBanner": "У вас уже есть активная подписка. Заказ дополнительных услуг в этой категории недоступен — используйте «Сменить тариф».",
     "blockedByMono": "Недоступно при активной подписке",
-    "bonusCoversNow": "Сейчас −{{amount}} ₽ с бонусов"
+    "bonusCoversNow": "Сейчас −{{amount}} ₽ с бонусов",
+    "discountBadge": "−{{amount}} ₽",
+    "discountLabel": "Скидка",
+    "startingFrom": "от"
   },
   "confirm": {
     "title": "Подтверждение"
