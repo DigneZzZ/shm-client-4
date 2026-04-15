@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Stack, Text, Card, Group, Badge, Loader, Center, Button, Paper, Divider, Select, NumberInput, Alert, Checkbox, ScrollArea, Tooltip } from '@mantine/core';
-import { IconArrowLeft, IconCreditCard, IconCheck, IconWallet, IconInfoCircle } from '@tabler/icons-react';
+import { IconArrowLeft, IconCreditCard, IconCheck, IconWallet, IconInfoCircle, IconGift } from '@tabler/icons-react';
 import { servicesApi, userApi } from '../api/client';
 import { notifications } from '@mantine/notifications';
 import { config } from '../config';
@@ -600,26 +600,41 @@ export default function OrderServiceModal({
                               </Text>
                             )}
                           </div>
-                          <Group gap="sm" align="baseline">
-                            {service.discount && service.discount > 0 || getAppliedBonus(service) > 0 ? (
-                              <>
-                                <Text size="sm" c="dimmed" style={{ textDecoration: 'line-through' }}>
-                                  {service.cost} ₽
-                                </Text>
-                              </>
-                            ) : null}
-                            <Text fw={600} color={service.discount && service.discount > 0 || getAppliedBonus(service) > 0 ? 'green' : undefined}>
-                              {getEffectiveCost(service)} ₽
-                            </Text>
-                            <Text size="xs" c="dimmed">
-                              / {service.period === 1 ? t('common.month') :
-                                 service.period === 3 ? t('common.months3') :
-                                 service.period === 6 ? t('common.months6') :
-                                 service.period === 12 ? t('common.year') :
-                                 formatPeriod(service.period, t)
-                                }
-                            </Text>
-                          </Group>
+                          {(() => {
+                            const hasDiscount = !!(service.discount && service.discount > 0);
+                            const bonusApplied = getAppliedBonus(service);
+                            const hasBonus = bonusApplied > 0;
+                            return (
+                              <Stack gap={2} align="flex-end">
+                                <Group gap="sm" align="baseline" wrap="nowrap">
+                                  {hasDiscount && (
+                                    <Text size="sm" c="dimmed" style={{ textDecoration: 'line-through' }}>
+                                      {service.cost} ₽
+                                    </Text>
+                                  )}
+                                  <Text fw={600} c={hasDiscount ? 'teal' : undefined}>
+                                    {getEffectiveCost(service)} ₽
+                                  </Text>
+                                  <Text size="xs" c="dimmed">
+                                    / {service.period === 1 ? t('common.month') :
+                                       service.period === 3 ? t('common.months3') :
+                                       service.period === 6 ? t('common.months6') :
+                                       service.period === 12 ? t('common.year') :
+                                       formatPeriod(service.period, t)
+                                      }
+                                  </Text>
+                                </Group>
+                                {hasBonus && (
+                                  <Group gap={4} wrap="nowrap">
+                                    <IconGift size={12} color="var(--mantine-color-teal-4)" />
+                                    <Text size="xs" c="teal.4" fw={500}>
+                                      −{bonusApplied} ₽ {t('profile.bonus', 'бонусами').toLowerCase()}
+                                    </Text>
+                                  </Group>
+                                )}
+                              </Stack>
+                            );
+                          })()}
                         </Group>
                       </Card>
                     </Tooltip>
