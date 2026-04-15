@@ -66,6 +66,8 @@ interface AppConfig {
   MONO_SERVICE_ENABLE: string;
   MONO_SERVICE_CATEGORIES: string;
   MONO_SERVICE_STATUSES: string;
+  SHOW_CARD_QUICK_ACTIONS: string;
+  NAV_PAYMENTS_IN_PROFILE: string;
 }
 
 declare global {
@@ -145,6 +147,8 @@ function getConfig(): AppConfig {
     MONO_SERVICE_ENABLE: runtimeConfig?.MONO_SERVICE_ENABLE || import.meta.env.VITE_MONO_SERVICE_ENABLE || 'false',
     MONO_SERVICE_CATEGORIES: runtimeConfig?.MONO_SERVICE_CATEGORIES || import.meta.env.VITE_MONO_SERVICE_CATEGORIES || '',
     MONO_SERVICE_STATUSES: runtimeConfig?.MONO_SERVICE_STATUSES || import.meta.env.VITE_MONO_SERVICE_STATUSES || 'ACTIVE,NOT PAID,PROGRESS',
+    SHOW_CARD_QUICK_ACTIONS: runtimeConfig?.SHOW_CARD_QUICK_ACTIONS || import.meta.env.VITE_SHOW_CARD_QUICK_ACTIONS || 'true',
+    NAV_PAYMENTS_IN_PROFILE: runtimeConfig?.NAV_PAYMENTS_IN_PROFILE || import.meta.env.VITE_NAV_PAYMENTS_IN_PROFILE || 'false',
 
   };
 }
