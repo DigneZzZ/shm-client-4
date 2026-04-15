@@ -71,9 +71,10 @@ interface ServiceDetailProps {
   service: UserService;
   onDelete?: () => void;
   onChangeTariff?: (service: UserService) => void;
+  inline?: boolean;
 }
 
-function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps) {
+function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: ServiceDetailProps) {
   const [storageData, setStorageData] = useState<string | null>(null);
   const [subscriptionUrl, setSubscriptionUrl] = useState<string | null>(null);
   const [nextServiceInfo, setNextServiceInfo] = useState<{ name: string; cost: number } | null>(null);
@@ -389,13 +390,17 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
         </div>
       </Group>
 
-      <Tabs value={activeTab} onChange={setActiveTab}>
-        <Tabs.List>
-          <Tabs.Tab value="info">{t('services.info')}</Tabs.Tab>
-          {isVpnOrProxy && service.status === 'ACTIVE' && <Tabs.Tab value="config">{t('services.connection')}</Tabs.Tab>}
-        </Tabs.List>
+      {!inline && (
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs.List>
+            <Tabs.Tab value="info">{t('services.info')}</Tabs.Tab>
+            {isVpnOrProxy && service.status === 'ACTIVE' && <Tabs.Tab value="config">{t('services.connection')}</Tabs.Tab>}
+          </Tabs.List>
+        </Tabs>
+      )}
 
-        <Tabs.Panel value="info" pt="md">
+      {(inline || activeTab === 'info') && (
+        <Box pt="md">
           <Stack gap="xs">
             <Group justify="space-between">
               <Text size="sm" c="dimmed">{t('services.status')}:</Text>
@@ -439,10 +444,11 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
               </>
             )}
           </Stack>
-        </Tabs.Panel>
+        </Box>
+      )}
 
-        { service.status === 'ACTIVE' && (
-          <Tabs.Panel value="config" pt="md">
+      { service.status === 'ACTIVE' && (inline || activeTab === 'config') && (
+          <Box pt="md">
             <Stack gap="md">
               {isProxy && subscriptionUrl && (
                 <Paper withBorder p="md" radius="md">
@@ -572,9 +578,8 @@ function ServiceDetail({ service, onDelete, onChangeTariff }: ServiceDetailProps
                 onDownload={isVpn ? downloadConfig : undefined}
               />
             </Stack>
-          </Tabs.Panel>
+          </Box>
         )}
-      </Tabs>
 
       {isNotPaid && (
         <Paper withBorder p="md" radius="md" mt="md">
@@ -1151,6 +1156,7 @@ export default function Services() {
             fetchServices();
           }}
           onChangeTariff={handleChangeTariff}
+          inline
         />
       ) : (
         <Accordion variant="separated" radius="md" multiple defaultValue={Object.keys(groupedServices)}>
