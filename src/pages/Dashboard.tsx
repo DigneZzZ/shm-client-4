@@ -163,7 +163,7 @@ export default function Dashboard() {
             <Group justify="space-between" wrap="nowrap">
               <Box style={{ minWidth: 0 }}>
                 <Text fw={700} fz={18} c="var(--shm-text-primary, #fff)">
-                  {activeService.service.name}
+                  #{activeService.user_service_id} - {activeService.service.name}
                 </Text>
                 <Group gap={6} mt={4}>
                   <IconClock size={14} color="rgba(255,255,255,0.48)" />
