@@ -165,7 +165,9 @@
     "partnerLink": "Партнёрская ссылка",
     "partnerLinkDescription": "Приглашайте друзей и получайте бонусы за их заказы и платежи.",
     "payHistory": "История платежей",
-    "wdHistory": "История списаний"
+    "wdHistory": "История списаний",
+    "referralInvited": "Приглашено",
+    "referralEarned": "Заработано"
   },
   "services": {
     "title": "Мои услуги",

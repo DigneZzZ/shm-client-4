@@ -26,6 +26,9 @@ import Services from './pages/Services';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
+import Dashboard from './pages/Dashboard';
+
+const dashboardEnabled = config.DASHBOARD_PAGE_ENABLE === 'true';
 
 const glassEnabled = config.THEME_GLASSMORPHISM_ENABLE === 'true';
 const theme = glassEnabled ? glassTheme : legacyTheme;
@@ -412,7 +415,14 @@ function AppContent() {
           <WebAppHeader onShowVersion={showVersion} />
           <Box px="md">
             <Routes>
-              <Route path="/" element={<Services />} />
+              {dashboardEnabled ? (
+                <>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/services" element={<Services />} />
+                </>
+              ) : (
+                <Route path="/" element={<Services />} />
+              )}
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -544,7 +554,14 @@ function AppContent() {
 
         <AppShell.Main>
           <Routes>
-            <Route path="/" element={<Services />} />
+            {dashboardEnabled ? (
+              <>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/services" element={<Services />} />
+              </>
+            ) : (
+              <Route path="/" element={<Services />} />
+            )}
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
