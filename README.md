@@ -14,7 +14,7 @@
 ## Docker Compose
 
 Образы собираются через GitHub Actions и публикуются в **GHCR** текущего репозитория:
-`ghcr.io/<owner>/<repo>-client-2:<tag>`. Для форка никаких дополнительных секретов
+`ghcr.io/<owner>/<repo>:<tag>`. Для форка никаких дополнительных секретов
 не требуется — workflow использует `GITHUB_TOKEN` автоматически. Убедитесь, что
 в `Settings → Actions → General → Workflow permissions` включено
 «Read and write permissions».
@@ -22,7 +22,7 @@
 ```yaml
 services:
   client:
-    image: ghcr.io/dignezzz/shm-client-4-client-2:latest
+    image: ghcr.io/dignezzz/shm-client-4:latest
     ports:
       - "3001:80"
     environment:

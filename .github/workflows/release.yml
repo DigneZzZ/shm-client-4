@@ -88,7 +88,7 @@ jobs:
         EOF
         cat public/version.json
 
-    - name: Build and push client-2 image
+    - name: Build and push client image
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -96,11 +96,11 @@ jobs:
         push: true
         target: client
         tags: |
-          ${{ steps.image.outputs.name }}-client-2:${{ steps.version.outputs.tag }}
-          ${{ steps.version.outputs.push_latest == 'true' && format('{0}-client-2:{1}', steps.image.outputs.name, steps.version.outputs.minor) || format('{0}-client-2:skip-minor-{1}', steps.image.outputs.name, steps.version.outputs.rev) }}
-          ${{ steps.version.outputs.push_latest == 'true' && format('{0}-client-2:latest', steps.image.outputs.name) || format('{0}-client-2:skip-latest-{1}', steps.image.outputs.name, steps.version.outputs.rev) }}
-        cache-from: type=gha,scope=client-2
-        cache-to: type=gha,mode=max,scope=client-2
+          ${{ steps.image.outputs.name }}:${{ steps.version.outputs.tag }}
+          ${{ steps.version.outputs.push_latest == 'true' && format('{0}:{1}', steps.image.outputs.name, steps.version.outputs.minor) || format('{0}:skip-minor-{1}', steps.image.outputs.name, steps.version.outputs.rev) }}
+          ${{ steps.version.outputs.push_latest == 'true' && format('{0}:latest', steps.image.outputs.name) || format('{0}:skip-latest-{1}', steps.image.outputs.name, steps.version.outputs.rev) }}
+        cache-from: type=gha,scope=client
+        cache-to: type=gha,mode=max,scope=client
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
@@ -111,8 +111,8 @@ jobs:
         body: |
           ## Docker Image Built
 
-          ### client-2 Image
-          - `${{ steps.image.outputs.name }}-client-2:${{ steps.version.outputs.tag }}`${{ steps.version.outputs.push_latest == 'true' && format('\n          - `{0}-client:{1}`', steps.image.outputs.name, steps.version.outputs.minor) || '' }}${{ steps.version.outputs.push_latest == 'true' && format('\n          - `{0}-client:latest`', steps.image.outputs.name) || '' }}
+          ### Docker Image
+          - `${{ steps.image.outputs.name }}:${{ steps.version.outputs.tag }}`${{ steps.version.outputs.push_latest == 'true' && format('\n          - `{0}:{1}`', steps.image.outputs.name, steps.version.outputs.minor) || '' }}${{ steps.version.outputs.push_latest == 'true' && format('\n          - `{0}:latest`', steps.image.outputs.name) || '' }}
 
           **Version:** `${{ steps.version.outputs.version_string }}`
           **Git Revision:** `${{ steps.version.outputs.rev }}`

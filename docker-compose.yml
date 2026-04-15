@@ -1,6 +1,6 @@
 services:
   shm-client:
-    image: ${IMAGE:-ghcr.io/dignezzz/shm-client-4-client-2:latest}
+    image: ${IMAGE:-ghcr.io/dignezzz/shm-client-4:latest}
     ports:
       - "3001:80"
     environment:

@@ -82,7 +82,7 @@ jobs:
           EOF
           cat public/version.json
 
-      - name: Build and push Clernt
+      - name: Build and push client image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -90,7 +90,7 @@ jobs:
           target: client
           platforms: linux/amd64,linux/arm64
           tags: |
-            ${{ steps.image.outputs.name }}-client-2:${{ steps.version.outputs.minor }}
-            ${{ steps.version.outputs.push_latest == 'true' && format('{0}-client-2:latest', steps.image.outputs.name) || format('{0}-client-2:skip-latest-{1}', steps.image.outputs.name, steps.version.outputs.rev) }}
-          cache-from: type=gha,scope=client-2
-          cache-to: type=gha,mode=max,scope=client-2
+            ${{ steps.image.outputs.name }}:${{ steps.version.outputs.minor }}
+            ${{ steps.version.outputs.push_latest == 'true' && format('{0}:latest', steps.image.outputs.name) || format('{0}:skip-latest-{1}', steps.image.outputs.name, steps.version.outputs.rev) }}
+          cache-from: type=gha,scope=client
+          cache-to: type=gha,mode=max,scope=client
