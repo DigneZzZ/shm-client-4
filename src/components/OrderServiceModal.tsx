@@ -613,7 +613,7 @@ export default function OrderServiceModal({
                               service.period === 12 ? t('common.year') :
                               formatPeriod(service.period, t);
                             return (
-                              <Stack gap={2} align="flex-end">
+                              <Stack gap={2}>
                                 <Group gap="sm" align="baseline" wrap="nowrap">
                                   {hasDiscount && (
                                     <Text size="sm" c="dimmed" style={{ textDecoration: 'line-through' }}>
