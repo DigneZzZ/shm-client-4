@@ -79,7 +79,7 @@ services:
 | `EMAIL_REQUIRED` | Hе дает пользоваться ЛК пока клиент не введет email | `false` |
 | `EMAIL_VERIFY_REQUIRED` | Hе дает заказать услугу пока email не будет подтвержден | `false` |
 | `ALLOW_EMAIL_VERIFY` | Разрешить верифицировать email | `true` |
-| `ALLOW_SERVICE_BLOCKED` | Разрешить пользователю блокировать услугу | `true` |
+| `ALLOW_SERVICE_BLOCKED` | Разрешить пользователю блокировать (останавливать) услугу | `false` |
 | `ALLOW_SERVICE_DELETE` | Разрешить пользователю удалять услугу | `true` |
 | `ALLOW_SERVICE_CHANGE` | Разрешить пользователю сменить услугу | `true` |
 | `ALLOW_SERVICE_CHANGE_FORCE` | Разрешить сменить услугу сразу (не спрашивая пользователя) | `false` |

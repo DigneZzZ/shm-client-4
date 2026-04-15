@@ -1143,6 +1143,15 @@ export default function Services() {
             </Stack>
           </Center>
         </Paper>
+      ) : services.length === 1 ? (
+        <ServiceDetail
+          service={services[0]}
+          onDelete={() => {
+            refreshAttemptsRef.current = 0;
+            fetchServices();
+          }}
+          onChangeTariff={handleChangeTariff}
+        />
       ) : (
         <Accordion variant="separated" radius="md" multiple defaultValue={Object.keys(groupedServices)}>
           {Object.entries(groupedServices).map(([category, categoryServices]) => {
