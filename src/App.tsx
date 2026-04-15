@@ -136,7 +136,7 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
       <Box
         style={{
           background: config.THEME_GLASSMORPHISM_ENABLE === 'true' && computedColorScheme === 'dark'
-            ? 'rgba(11, 11, 20, 0.7)'
+            ? 'rgba(10, 22, 40, 0.7)'
             : computedColorScheme === 'dark'
             ? 'rgba(40, 40, 45, 0.85)'
             : 'rgba(255, 255, 255, 0.85)',
@@ -452,7 +452,7 @@ function AppContent() {
                 left: appShellOffset,
                 right: appShellOffset,
                 border: 'none',
-                background: 'rgba(11, 11, 20, 0.6)',
+                background: 'rgba(10, 22, 40, 0.6)',
                 backdropFilter: 'blur(16px) saturate(140%)',
                 WebkitBackdropFilter: 'blur(16px) saturate(140%)',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.06)',

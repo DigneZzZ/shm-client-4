@@ -192,7 +192,7 @@ export default function Dashboard() {
               loading={connecting}
               style={{
                 height: 52,
-                background: 'var(--shm-grad-cta, linear-gradient(90deg,#6A4BFF 0%,#3E8BFF 100%))',
+                background: 'var(--shm-grad-cta, linear-gradient(90deg,#10B981 0%,#0891B2 100%))',
                 color: '#fff',
                 border: 'none',
               }}
@@ -227,7 +227,7 @@ export default function Dashboard() {
                   mt="xs"
                   rightSection={<IconArrowRight size={16} />}
                   style={{
-                    background: 'var(--shm-grad-cta, linear-gradient(90deg,#6A4BFF 0%,#3E8BFF 100%))',
+                    background: 'var(--shm-grad-cta, linear-gradient(90deg,#10B981 0%,#0891B2 100%))',
                     color: '#fff',
                     border: 'none',
                   }}

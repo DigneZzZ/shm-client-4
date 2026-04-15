@@ -53,10 +53,13 @@ export function getMonoServiceSettings() {
   const enabled = config.MONO_SERVICE_ENABLE === 'true';
   // Normalize each token so operators can list either raw categories (e.g. "wg1")
   // or canonical ones (e.g. "vpn") — both are accepted.
+  // Important: filter empty tokens BEFORE normalizing, otherwise an empty string
+  // would normalize to 'other' and poison the applicability check.
   const categories = config.MONO_SERVICE_CATEGORIES
     .split(',')
-    .map((c) => normalizeCategory(c.trim()).toLowerCase())
-    .filter(Boolean);
+    .map((c) => c.trim())
+    .filter(Boolean)
+    .map((c) => normalizeCategory(c).toLowerCase());
   const statuses = new Set(
     config.MONO_SERVICE_STATUSES
       .split(',')

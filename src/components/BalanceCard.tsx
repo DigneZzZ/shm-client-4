@@ -24,11 +24,11 @@ export default function BalanceCard({ balance, currency = '₽', onTopUp }: Bala
     <Box
       style={{
         position: 'relative',
-        background: 'var(--shm-grad-balance, linear-gradient(135deg,#5B3DF5 0%,#8A6BFF 55%,#B9A3FF 100%))',
+        background: 'var(--shm-grad-balance, linear-gradient(135deg,#065F46 0%,#10B981 55%,#34D399 100%))',
         borderRadius: 20,
         padding: 20,
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(90, 60, 230, 0.35)',
+        boxShadow: '0 8px 32px rgba(6, 95, 70, 0.38)',
       }}
     >
       <Box

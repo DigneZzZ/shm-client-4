@@ -84,8 +84,8 @@ export function PromoCard({ onClick }: PromoCardProps) {
       title={t('promo.title')}
       description={t('promo.placeholder', 'Активировать промокод или купон')}
       icon={<IconTicket size={20} />}
-      iconColor="#B9A3FF"
-      iconBg="rgba(106,75,255,0.18)"
+      iconColor="#6EE7B7"
+      iconBg="rgba(16,185,129,0.18)"
       onClick={onClick}
     />
   );

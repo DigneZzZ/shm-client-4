@@ -73,24 +73,24 @@ button:focus-visible {
  * (see src/main.tsx). Variables stay inert otherwise.
  * ============================================================ */
 :root[data-shm-glass="true"] {
-  --shm-bg-base: #0B0B14;
-  --shm-bg-surface: rgba(255, 255, 255, 0.04);
-  --shm-bg-raised: rgba(255, 255, 255, 0.07);
+  --shm-bg-base: #0A1628;
+  --shm-bg-surface: rgba(255, 255, 255, 0.03);
+  --shm-bg-raised: rgba(255, 255, 255, 0.06);
   --shm-border-glass: rgba(255, 255, 255, 0.06);
   --shm-border-strong: rgba(255, 255, 255, 0.12);
-  --shm-accent-300: #B9A3FF;
-  --shm-accent-400: #8A6BFF;
-  --shm-accent-500: #6A4BFF;
-  --shm-accent-600: #4F35D6;
-  --shm-success: #2ED687;
-  --shm-success-bg: rgba(46, 214, 135, 0.15);
-  --shm-warning: #FFB547;
-  --shm-danger: #FF5A6B;
+  --shm-accent-300: #6EE7B7;
+  --shm-accent-400: #34D399;
+  --shm-accent-500: #10B981;
+  --shm-accent-600: #059669;
+  --shm-success: #10B981;
+  --shm-success-bg: rgba(16, 185, 129, 0.16);
+  --shm-warning: #F59E0B;
+  --shm-danger: #EF4444;
   --shm-text-primary: #FFFFFF;
   --shm-text-secondary: rgba(255, 255, 255, 0.72);
   --shm-text-muted: rgba(255, 255, 255, 0.48);
-  --shm-grad-balance: linear-gradient(135deg, #5B3DF5 0%, #8A6BFF 55%, #B9A3FF 100%);
-  --shm-grad-cta: linear-gradient(90deg, #6A4BFF 0%, #3E8BFF 100%);
+  --shm-grad-balance: linear-gradient(135deg, #065F46 0%, #10B981 55%, #34D399 100%);
+  --shm-grad-cta: linear-gradient(90deg, #10B981 0%, #0891B2 100%);
   --shm-blur: blur(20px) saturate(140%);
   --shm-shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
@@ -113,7 +113,7 @@ html[data-shm-glass="true"] body {
   min-height: 100vh;
 }
 
-/* Ambient purple/blue glow behind everything */
+/* Ambient emerald/cyan glow behind everything */
 html[data-shm-glass="true"] body::before {
   content: "";
   position: fixed;
@@ -121,8 +121,8 @@ html[data-shm-glass="true"] body::before {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(60% 40% at 20% 10%, rgba(106, 75, 255, 0.35), transparent 70%),
-    radial-gradient(50% 35% at 85% 95%, rgba(62, 139, 255, 0.20), transparent 70%);
+    radial-gradient(60% 40% at 20% 10%, rgba(16, 185, 129, 0.22), transparent 70%),
+    radial-gradient(50% 35% at 85% 95%, rgba(8, 145, 178, 0.18), transparent 70%);
 }
 
 /* Glass utility class — apply to any panel-like surface */
