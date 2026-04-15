@@ -113,16 +113,50 @@ html[data-shm-glass="true"] body {
   min-height: 100vh;
 }
 
-/* Ambient emerald/cyan glow behind everything */
-html[data-shm-glass="true"] body::before {
+/* Ambient emerald/cyan glow — two soft blobs that slowly drift.
+   Animates `transform` only → runs on compositor, no paint work,
+   cheap on mobile/low-end GPUs. No blur filters (expensive per-frame). */
+html[data-shm-glass="true"] body::before,
+html[data-shm-glass="true"] body::after {
   content: "";
   position: fixed;
-  inset: 0;
+  width: 80vmax;
+  height: 80vmax;
+  border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  background:
-    radial-gradient(60% 40% at 20% 10%, rgba(16, 185, 129, 0.22), transparent 70%),
-    radial-gradient(50% 35% at 85% 95%, rgba(8, 145, 178, 0.18), transparent 70%);
+  will-change: transform;
+}
+
+html[data-shm-glass="true"] body::before {
+  top: -25%;
+  left: -20%;
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.22) 0%, transparent 65%);
+  animation: shm-blob-a 32s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+html[data-shm-glass="true"] body::after {
+  bottom: -30%;
+  right: -15%;
+  background: radial-gradient(circle at center, rgba(8, 145, 178, 0.20) 0%, transparent 65%);
+  animation: shm-blob-b 42s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+@keyframes shm-blob-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(8vw, 4vh, 0) scale(1.08); }
+}
+
+@keyframes shm-blob-b {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-6vw, -5vh, 0) scale(0.94); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-shm-glass="true"] body::before,
+  html[data-shm-glass="true"] body::after {
+    animation: none;
+  }
 }
 
 /* Glass utility class — apply to any panel-like surface */

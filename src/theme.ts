@@ -41,9 +41,9 @@ export const glassTheme = createTheme({
   fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
   defaultRadius: 'lg',
   radius: {
-    xs: rem(8),
-    sm: rem(12),
-    md: rem(14),
+    xs: rem(6),
+    sm: rem(10),
+    md: rem(12),
     lg: rem(20),
     xl: rem(999),
   },
@@ -94,6 +94,7 @@ export const glassTheme = createTheme({
       defaultProps: { radius: 'lg' },
       classNames: { root: 'shm-glass' },
     },
-    Button: { defaultProps: { radius: 'md' } },
+    Button: { defaultProps: { radius: 'sm' } },
+    ActionIcon: { defaultProps: { radius: 'sm' } },
   },
 });
