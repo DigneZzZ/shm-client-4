@@ -104,6 +104,15 @@ html[data-shm-glass="true"] body {
   color-scheme: dark;
 }
 
+/* Vite starter puts `display:flex; place-items:center` on body which pins
+   the whole app to the top-left. Reset to a normal block flow so AppShell
+   and Login can take full width and use their own centering. */
+html[data-shm-glass="true"] body {
+  display: block;
+  place-items: initial;
+  min-height: 100vh;
+}
+
 /* Ambient purple/blue glow behind everything */
 html[data-shm-glass="true"] body::before {
   content: "";
