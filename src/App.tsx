@@ -152,7 +152,7 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
           padding: '8px 12px',
         }}
       >
-        <Group justify="space-around" gap={4}>
+        <Group justify="space-around" gap={0}>
           {NAV_ITEMS
             .filter((item) =>
               config.NAV_PAYMENTS_IN_PROFILE === 'true'
@@ -162,6 +162,9 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
             .map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
+            const isGlass = config.THEME_GLASSMORPHISM_ENABLE === 'true';
+            const activeColor = isGlass ? 'var(--shm-accent-500, #10B981)' : 'var(--mantine-color-blue-6)';
+            const inactiveColor = computedColorScheme === 'dark' ? 'rgba(255,255,255,0.45)' : '#6b7280';
             return (
               <Box
                 key={item.path}
@@ -171,18 +174,37 @@ function BottomNavigation({ onPayments, onWithdrawals }: { onPayments: () => voi
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '8px 12px',
-                  borderRadius: 14,
+                  padding: '10px 16px',
+                  borderRadius: 16,
                   cursor: 'pointer',
+                  position: 'relative',
                   background: isActive
-                    ? (computedColorScheme === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)')
+                    ? (isGlass ? 'rgba(16, 185, 129, 0.12)' : (computedColorScheme === 'dark' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(59, 130, 246, 0.1)'))
                     : 'transparent',
-                  color: isActive ? 'var(--mantine-color-blue-6)' : (computedColorScheme === 'dark' ? '#9ca3af' : '#6b7280'),
-                  transition: 'all 0.2s ease',
+                  color: isActive ? activeColor : inactiveColor,
+                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
                 }}
               >
-                <Icon size={20} />
-                <Text size="xs" mt={4} fw={isActive ? 600 : 400}>{t(item.labelKey)}</Text>
+                <Icon size={22} strokeWidth={isActive ? 2.2 : 1.8} />
+                <Text size="10px" mt={3} fw={isActive ? 700 : 500} style={{ letterSpacing: 0.2 }}>
+                  {t(item.labelKey)}
+                </Text>
+                {isActive && isGlass && (
+                  <Box
+                    style={{
+                      position: 'absolute',
+                      bottom: 2,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 16,
+                      height: 3,
+                      borderRadius: 2,
+                      background: activeColor,
+                      boxShadow: `0 0 8px ${activeColor}`,
+                    }}
+                  />
+                )}
               </Box>
             );
           })}

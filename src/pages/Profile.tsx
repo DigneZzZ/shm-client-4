@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, Tooltip, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, Skeleton, useMantineColorScheme } from '@mantine/core';
+import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, Tooltip, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, Skeleton, useMantineColorScheme, Badge } from '@mantine/core';
 import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconCreditCard, IconReceipt, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useClipboard } from '@mantine/hooks';
@@ -665,7 +665,6 @@ export default function Profile() {
       )}
 
     { config.ALLOW_TELEGRAM_PIN === 'true' && (
-      <>
       <Card withBorder radius="md" p="lg">
         <Group justify="space-between" mb="md">
           <Text fw={500}>{t('profile.telegram')}</Text>
@@ -684,21 +683,30 @@ export default function Profile() {
           ) : telegramUsername ? (
             <div>
               <Text size="sm">@{telegramUsername}</Text>
-              <Text size="xs" c="dimmed">{t('profile.telegramLinked')}</Text>
+              <Badge size="sm" color="green" variant="light">{t('profile.telegramLinked')}</Badge>
             </div>
           ) : (
             <Text size="sm" c="dimmed">{t('profile.telegramNotLinked')}</Text>
           )}
         </Group>
-          { telegramLoading ? (
-            <Skeleton width="70%" mt={10} height={16} />
-          ) : (
-            <Text size="xs" c="dimmed" mt="md">
-              {t('profile.telegramDescription')}
-            </Text>
-          )}
+        { telegramLoading ? (
+          <Skeleton width="70%" mt={10} height={16} />
+        ) : !telegramUsername ? (
+          <Alert
+            variant="light"
+            color="blue"
+            icon={<IconBrandTelegram size={16} />}
+            mt="md"
+            radius="md"
+          >
+            {t('profile.telegramAlert', 'Привяжите Telegram, чтобы получать уведомления о статусе услуг, платежах, а также оплачивать подписку Telegram-звёздами.')}
+          </Alert>
+        ) : (
+          <Text size="xs" c="dimmed" mt="md">
+            {t('profile.telegramDescription')}
+          </Text>
+        )}
       </Card>
-      </>
     )}
 
       <SecuritySettings />
