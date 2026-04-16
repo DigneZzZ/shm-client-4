@@ -289,7 +289,12 @@ export default function Login() {
       } else if (errMsg === 'Captcha required') {
         notifications.show({ title: t('common.error'), message: t('auth.captchaRequired'), color: 'red' });
       } else if (errMsg === 'Login already in use' || errMsg === 'Email already in use') {
-        notifications.show({ title: t('common.error'), message: t('auth.loginAlreadyInUse'), color: 'red' });
+        notifications.show({
+          title: t('auth.loginAlreadyInUse'),
+          message: t('auth.loginAlreadyInUseHint', 'Этот логин или email уже зарегистрирован. Используйте «Забыли пароль?» для восстановления доступа. Если вы регистрировались через Telegram-бота — ваш email является логином.'),
+          color: 'orange',
+          autoClose: 10000,
+        });
       } else {
         notifications.show({ title: t('common.error'), message: t('auth.registerError'), color: 'red' });
       }
