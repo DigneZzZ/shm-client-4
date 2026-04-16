@@ -138,13 +138,13 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
             (it: ForecastItem) => String(it.user_service_id) === String(service.user_service_id)
           );
           if (item) {
-            const needToPay = Math.max(0, Math.ceil((item.total - balance) * 100) / 100);
+            const needToPay = Math.max(0, Math.ceil(item.total - balance));
             setForecastTotal(needToPay);
             setPayAmount(needToPay);
             resolved = true;
           } else if (forecast.total > 0) {
             setForecastTotal(forecast.total);
-            setPayAmount(Math.max(0, Math.ceil(forecast.total * 100) / 100));
+            setPayAmount(Math.max(0, Math.ceil(forecast.total)));
             resolved = true;
           }
         }
@@ -152,7 +152,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
           const cost = Number(service.service.cost || 0);
           const userBalance = Number(user?.balance || 0);
           const userBonus = Number(user?.bonus || 0);
-          const needToPay = Math.max(0, Math.ceil((cost - userBalance - userBonus) * 100) / 100);
+          const needToPay = Math.max(0, Math.ceil(cost - userBalance - userBonus));
           setForecastTotal(needToPay);
           setPayAmount(needToPay);
         }
@@ -161,7 +161,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
           const cost = Number(service.service.cost || 0);
           const userBalance = Number(user?.balance || 0);
           const userBonus = Number(user?.bonus || 0);
-          const needToPay = Math.max(0, Math.ceil((cost - userBalance - userBonus) * 100) / 100);
+          const needToPay = Math.max(0, Math.ceil(cost - userBalance - userBonus));
           setForecastTotal(needToPay);
           setPayAmount(needToPay);
         }

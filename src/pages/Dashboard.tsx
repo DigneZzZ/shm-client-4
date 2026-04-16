@@ -94,10 +94,10 @@ export default function Dashboard() {
               String(it.user_service_id) === String(needingPayment.user_service_id)
           );
           if (item) {
-            setForecastAmount(Math.max(0, Math.ceil((item.total - balance) * 100) / 100));
+            setForecastAmount(Math.max(0, Math.ceil(item.total - balance)));
             resolved = true;
           } else if (f.total > 0) {
-            setForecastAmount(Math.max(0, Math.ceil((f.total - balance) * 100) / 100));
+            setForecastAmount(Math.max(0, Math.ceil(f.total - balance)));
             resolved = true;
           }
         }
@@ -105,7 +105,7 @@ export default function Dashboard() {
           const cost = Number(needingPayment.service.cost || 0);
           const bal = Number(user?.balance || 0);
           const bon = Number(user?.bonus || 0);
-          setForecastAmount(Math.max(0, Math.ceil((cost - bal - bon) * 100) / 100));
+          setForecastAmount(Math.max(0, Math.ceil(cost - bal - bon)));
         }
       } catch {
         /* empty state */
