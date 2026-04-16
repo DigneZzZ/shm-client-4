@@ -450,6 +450,13 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
       { service.status === 'ACTIVE' && (inline || activeTab === 'config') && (
           <Box pt="md">
             <Stack gap="md">
+              {config.CUSTOM_INSTRUCTION && (
+                <Paper withBorder p="md" radius="md">
+                  <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-line' }}>
+                    {config.CUSTOM_INSTRUCTION.replace(/\\n/g, '\n')}
+                  </Text>
+                </Paper>
+              )}
               {isProxy && subscriptionUrl && (
                 <Paper withBorder p="md" radius="md">
                   { config.SHOW_PROXY_SUB_LINK === 'true' && (
@@ -473,7 +480,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
                         <Timeline.Item bullet={<IconDownload size={12} />} title={t('services.stepDownloadApp')}>
                           <AppDownloadBlock type="proxy" />
                         </Timeline.Item>
-                        <Timeline.Item bullet={<IconDeviceMobileCog size={12} />} title={t('services.stepConfigureApp') + ' ' + (urlSchema ? t('services.deviceConfig') : t('services.openSubLink'))}>
+                        <Timeline.Item bullet={<IconDeviceMobileCog size={12} />} title={t('services.stepConfigureApp') + ' ' + (urlSchema ? t('services.deviceConfig') : (config.CONFIGURE_BUTTON_LABEL || t('services.openSubLink')))}>
                           <Group gap="xs" mt="xs">
                             { config.SHOW_PROXY_QR === 'true' && (
                               <Button
@@ -491,7 +498,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
                               leftSection={<IconDeviceMobileCog size={16} />}
                               variant="light"
                             >
-                              {urlSchema ? t('services.deviceConfig') : t('services.openSubLink')}
+                              {urlSchema ? t('services.deviceConfig') : (config.CONFIGURE_BUTTON_LABEL || t('services.openSubLink'))}
                             </Button>
                           </Group>
                         </Timeline.Item>
@@ -514,7 +521,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
                         leftSection={<IconDeviceMobileCog size={16} />}
                         variant="light"
                       >
-                        {t('services.openSubLink')}
+                        {config.CONFIGURE_BUTTON_LABEL || t('services.openSubLink')}
                       </Button>
                     </Group>
                     )}

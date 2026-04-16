@@ -71,6 +71,8 @@ interface AppConfig {
   THEME_GLASSMORPHISM_ENABLE: string;
   DASHBOARD_PAGE_ENABLE: string;
   ORDER_GROUP_BY_PERIOD: string;
+  CONFIGURE_BUTTON_LABEL: string;
+  CUSTOM_INSTRUCTION: string;
 }
 
 declare global {
@@ -155,6 +157,8 @@ function getConfig(): AppConfig {
     THEME_GLASSMORPHISM_ENABLE: runtimeConfig?.THEME_GLASSMORPHISM_ENABLE || import.meta.env.VITE_THEME_GLASSMORPHISM_ENABLE || 'false',
     DASHBOARD_PAGE_ENABLE: runtimeConfig?.DASHBOARD_PAGE_ENABLE || import.meta.env.VITE_DASHBOARD_PAGE_ENABLE || 'false',
     ORDER_GROUP_BY_PERIOD: runtimeConfig?.ORDER_GROUP_BY_PERIOD || import.meta.env.VITE_ORDER_GROUP_BY_PERIOD || 'true',
+    CONFIGURE_BUTTON_LABEL: runtimeConfig?.CONFIGURE_BUTTON_LABEL || import.meta.env.VITE_CONFIGURE_BUTTON_LABEL || '',
+    CUSTOM_INSTRUCTION: runtimeConfig?.CUSTOM_INSTRUCTION || import.meta.env.VITE_CUSTOM_INSTRUCTION || '',
 
   };
 }
