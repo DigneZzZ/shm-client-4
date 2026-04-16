@@ -121,9 +121,10 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
   const canStop = config.ALLOW_SERVICE_BLOCKED === 'true' && service.status === 'ACTIVE';
   const canChange = config.ALLOW_SERVICE_CHANGE === 'true' && ['BLOCK', 'ACTIVE'].includes(service.status);
   const isNotPaid = service.status === 'NOT PAID';
+  const needsPayment = service.status === 'NOT PAID' || service.status === 'BLOCK';
 
   useEffect(() => {
-    if (!isNotPaid) return;
+    if (!needsPayment) return;
     const fetchForecast = async () => {
       setForecastLoading(true);
       try {
@@ -150,7 +151,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
       }
     };
     fetchForecast();
-  }, [service.user_service_id, isNotPaid]);
+  }, [service.user_service_id, needsPayment]);
 
   const loadPaySystems = async () => {
     if (paySystems.length > 0) return;
@@ -170,10 +171,10 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
   };
 
   useEffect(() => {
-    if (isNotPaid && forecastTotal !== null && forecastTotal > 0) {
+    if (needsPayment && forecastTotal !== null && forecastTotal > 0) {
       loadPaySystems();
     }
-  }, [isNotPaid, forecastTotal]);
+  }, [needsPayment, forecastTotal]);
 
   const handlePay = async () => {
     const paySystem = paySystems.find(ps => ps.shm_url === selectedPaySystem);
@@ -588,7 +589,7 @@ function ServiceDetail({ service, onDelete, onChangeTariff, inline = false }: Se
           </Box>
         )}
 
-      {isNotPaid && (
+      {needsPayment && (
         <Paper withBorder p="md" radius="md" mt="md">
           <Stack gap="sm">
             {forecastLoading ? (
