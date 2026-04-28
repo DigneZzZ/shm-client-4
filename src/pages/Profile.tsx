@@ -80,8 +80,14 @@ export default function Profile() {
   const [telegramSaving, setTelegramSaving] = useState(false);
   const [telegramWaitingOpen, setTelegramWaitingOpen] = useState(false);
   const [unbindConfirmOpen, setUnbindConfirmOpen] = useState(false);
+  const [telegramMergeOpen, setTelegramMergeOpen] = useState(false);
+  const [mergeHasServices, setMergeHasServices] = useState<boolean | null>(null);
+  const [mergeTgUsername, setMergeTgUsername] = useState('');
+  const [mergeSending, setMergeSending] = useState(false);
+  const [mergeSent, setMergeSent] = useState(false);
   const useTelegramAuthBind = hasTelegramOidcAuth || hasTelegramWidget;
   const showTelegramCard = config.ALLOW_TELEGRAM_PIN === 'true' || useTelegramAuthBind;
+  const showMergeQuestionnaire = !useTelegramAuthBind && config.ALLOW_TELEGRAM_PIN === 'true';
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [emailSaving, setEmailSaving] = useState(false);
@@ -799,6 +805,12 @@ export default function Profile() {
                 {t('profile.telegramAuthLink')}
               </Button>
             )
+          ) : showMergeQuestionnaire ? (
+            telegramUsername ? (
+              <Button variant="light" size="xs" onClick={openTelegramModal}>
+                {t('profile.change')}
+              </Button>
+            ) : null
           ) : (
             <Button variant="light" size="xs" onClick={openTelegramModal}>
               {telegramUsername ? t('profile.change') : t('profile.link')}
@@ -820,7 +832,41 @@ export default function Profile() {
         </Group>
         { telegramLoading ? (
           <Skeleton width="70%" mt={10} height={16} />
-        ) : !telegramUsername ? (
+        ) : telegramUsername ? (
+          <Text size="xs" c="dimmed" mt="md">
+            {t('profile.telegramDescription')}
+          </Text>
+        ) : showMergeQuestionnaire ? (
+          <Stack gap="md" mt="md">
+            <Alert variant="light" color="blue" icon={<IconBrandTelegram size={16} />} radius="md">
+              {t('profile.telegramAlert')}
+            </Alert>
+            <Text fw={500} size="sm">{t('profile.telegramLinkQuestion')}</Text>
+            <Group gap="sm">
+              <Button
+                variant="light"
+                color="teal"
+                leftSection={<IconBrandTelegram size={16} />}
+                onClick={() => {
+                  const botName = config.TELEGRAM_BOT_NAME;
+                  if (botName) {
+                    window.open(`https://t.me/${botName}?start=link`, '_blank');
+                  }
+                  openTelegramModal();
+                }}
+              >
+                {t('profile.telegramLinkNo')}
+              </Button>
+              <Button
+                variant="light"
+                color="orange"
+                onClick={() => setTelegramMergeOpen(true)}
+              >
+                {t('profile.telegramLinkYes')}
+              </Button>
+            </Group>
+          </Stack>
+        ) : (
           <Alert
             variant="light"
             color="blue"
@@ -828,12 +874,8 @@ export default function Profile() {
             mt="md"
             radius="md"
           >
-            {t('profile.telegramAlert', 'Привяжите Telegram, чтобы получать уведомления о статусе услуг, платежах, а также оплачивать подписку Telegram-звёздами.')}
+            {t('profile.telegramAlert')}
           </Alert>
-        ) : (
-          <Text size="xs" c="dimmed" mt="md">
-            {t('profile.telegramDescription')}
-          </Text>
         )}
       </Card>
     )}
@@ -873,6 +915,87 @@ export default function Profile() {
             </Button>
           </Group>
         </Stack>
+      </Modal>
+
+      <Modal
+        opened={telegramMergeOpen}
+        onClose={() => { setTelegramMergeOpen(false); setMergeHasServices(null); setMergeTgUsername(''); setMergeSent(false); }}
+        title={t('profile.telegramMergeTitle')}
+      >
+        {mergeSent ? (
+          <Stack gap="md" align="center" py="md">
+            <IconCheck size={48} color="var(--mantine-color-teal-6)" />
+            <Text ta="center" fw={500}>{t('profile.telegramMergeSent')}</Text>
+            <Text ta="center" size="sm" c="dimmed">
+              {t('profile.telegramMergeSentDesc')}
+            </Text>
+            <Button variant="light" onClick={() => { setTelegramMergeOpen(false); setMergeSent(false); setMergeHasServices(null); setMergeTgUsername(''); }}>
+              {t('common.close')}
+            </Button>
+          </Stack>
+        ) : mergeHasServices === null ? (
+          <Stack gap="md">
+            <Text size="sm">{t('profile.telegramMergeQ1')}</Text>
+            <Group gap="sm">
+              <Button variant="light" color="orange" onClick={() => setMergeHasServices(true)} style={{ flex: 1 }}>
+                {t('common.yes')}
+              </Button>
+              <Button variant="light" onClick={() => setMergeHasServices(false)} style={{ flex: 1 }}>
+                {t('common.no')}
+              </Button>
+            </Group>
+          </Stack>
+        ) : (
+          <Stack gap="md">
+            {mergeHasServices && (
+              <Alert variant="light" color="orange" icon={<IconAlertCircle size={16} />} radius="md">
+                {t('profile.telegramMergeWarning')}
+              </Alert>
+            )}
+            <TextInput
+              label={t('profile.telegramLogin')}
+              placeholder="@username"
+              value={mergeTgUsername}
+              onChange={(e) => setMergeTgUsername(e.target.value)}
+            />
+            <Text size="xs" c="dimmed">
+              {t('profile.telegramMergeHint')}
+            </Text>
+            <Button
+              fullWidth
+              loading={mergeSending}
+              disabled={!mergeTgUsername.trim()}
+              onClick={async () => {
+                setMergeSending(true);
+                try {
+                  await telegramApi.updateSettings({
+                    merge_request: {
+                      tg_username: mergeTgUsername.trim().replace('@', ''),
+                      has_services: mergeHasServices,
+                      requested_at: new Date().toISOString(),
+                    },
+                  });
+                  setMergeSent(true);
+                  notifications.show({
+                    title: t('common.success'),
+                    message: t('profile.telegramMergeSent'),
+                    color: 'green',
+                  });
+                } catch {
+                  notifications.show({
+                    title: t('common.error'),
+                    message: t('profile.telegramMergeSendError'),
+                    color: 'red',
+                  });
+                } finally {
+                  setMergeSending(false);
+                }
+              }}
+            >
+              {t('profile.telegramMergeSend')}
+            </Button>
+          </Stack>
+        )}
       </Modal>
 
       <Modal
