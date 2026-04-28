@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, Text, Stack, Group, Divider, Grid, Button, TextInput, Tooltip, ActionIcon, Avatar, Title, Modal, Loader, Center, Collapse, Alert, Skeleton, useMantineColorScheme, Badge } from '@mantine/core';
 import { IconUser, IconPhone, IconCopy, IconCheck, IconBrandTelegram, IconCreditCard, IconReceipt, IconChevronDown, IconChevronUp, IconMail, IconAlertCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -108,6 +108,7 @@ export default function Profile() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
   const [forecastOpen, setForecastOpen] = useState(false);
+  const oidcPollTimerRef = useRef<number | null>(null);
   const { colorScheme } = useMantineColorScheme();
   const clipboardId = useClipboard({ timeout: 1000 });
   const clipboardLink = useClipboard({ timeout: 1000 });
@@ -228,6 +229,15 @@ export default function Profile() {
     });
   }, [t, loadTelegramSettings, showTelegramCard]);
 
+  useEffect(() => {
+    return () => {
+      if (oidcPollTimerRef.current !== null) {
+        window.clearInterval(oidcPollTimerRef.current);
+        oidcPollTimerRef.current = null;
+      }
+    };
+  }, []);
+
   const handleSave = async () => {
     try {
       await userApi.updateProfile(formData);
@@ -279,17 +289,23 @@ export default function Profile() {
       }
 
       const startedAt = Date.now();
-      const pollTimer = window.setInterval(async () => {
+      oidcPollTimerRef.current = window.setInterval(async () => {
         if (!popup.closed) {
           if (Date.now() - startedAt < 180000) {
             return;
           }
-          window.clearInterval(pollTimer);
+          if (oidcPollTimerRef.current !== null) {
+            window.clearInterval(oidcPollTimerRef.current);
+            oidcPollTimerRef.current = null;
+          }
           setTelegramWaitingOpen(false);
           return;
         }
 
-        window.clearInterval(pollTimer);
+        if (oidcPollTimerRef.current !== null) {
+          window.clearInterval(oidcPollTimerRef.current);
+          oidcPollTimerRef.current = null;
+        }
         setTelegramWaitingOpen(false);
         await loadTelegramSettings();
       }, 700);
