@@ -10,4 +10,24 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-mantine': [
+            '@mantine/core',
+            '@mantine/dates',
+            '@mantine/form',
+            '@mantine/hooks',
+            '@mantine/modals',
+            '@mantine/notifications',
+          ],
+          'vendor-icons': ['@tabler/icons-react'],
+          'vendor-i18n': ['i18next', 'i18next-browser-languagedetector', 'react-i18next'],
+          'vendor-misc': ['axios', 'qrcode.react', 'zustand'],
+        },
+      },
+    },
+  },
 })
